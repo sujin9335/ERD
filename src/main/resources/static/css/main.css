@@ -1,0 +1,29 @@
+#mian {
+    height: 500px;
+}
+#modalGet .border div {
+    border: 1px solid #ccc;
+    border-collapse: collapse;
+    padding: 3px;
+}
+#modalUpsert .border div {
+    border: 1px solid #ccc;
+    border-collapse: collapse;
+    padding: 3px;
+}
+
+.hi300 {
+    height: 450px;
+}
+
+.w70 {
+    width: 70%;
+}
+
+.modal-custom {
+    max-width: 70%;
+}
+
+.editorDiv div div {
+    border: none !important;
+}

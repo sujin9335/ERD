@@ -1,0 +1,52 @@
+# ===== Spring INFO =====
+spring:
+  # JSP, CSS Auto Reload
+  devtools:
+    livereload:
+      enabled: true
+  # ViewResolver
+  mvc:
+    view:
+      prefix: /WEB-INF/views/
+      suffix: .jsp
+  # Resource
+  resources:
+    static-locations: classpath:/resources/,classpath:/static/,/WEB-INF/views/
+  # ===== DB INFO =====
+  #DataSource
+  datasource:
+    url: jdbc:mariadb://localhost:3306/sujin?useUnicode=yes&characterEncoding=UTF-8&serverTimezone=UTC
+    username: root
+    password: root
+    driver-class-name: org.mariadb.jdbc.Driver
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 2MB
+      max-request-size: 10MB
+      file-size-threshold: 0
+
+#업로드 경로
+project:
+  uploadpath: C:\\upload
+
+# ===== Developer Tools INFO ===== 
+#Sping Built-in server
+server:
+  port: 25000
+  error:
+    whitelabel:
+      enabled: false
+
+# log4j위치설정
+# logging:
+#   config: classpath:log4j2.xml
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: DEBUG
+  file:
+    name: application.log
+    path: /var/log/myapp
+

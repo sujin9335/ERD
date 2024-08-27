@@ -1,0 +1,31 @@
+/* #main div {
+    border: 1px solid #ccc;
+    border-collapse: collapse;
+    padding: 3px;
+} */
+
+.hi-700 {
+    height: 700px;
+}
+
+.hi-500 {
+    height: 500px;
+}
+
+.modal-custom {
+    max-width: 50%;
+}
+
+#groupPar {
+    width: 200px;
+}
+
+.scroll {
+    overflow: auto;
+    max-height: 480px;
+    /* 원하는 최대 높이 설정 */
+}
+
+#userRegis {
+    height: 600px;
+}
