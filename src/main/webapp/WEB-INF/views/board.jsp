@@ -320,8 +320,8 @@
                         }
                         
                     },
-                    error: function () {
-                        alert("통신에러");
+                    error: function (error) {
+                        alert("서버에러" + error.status + " " + error.responseText);
                     }
                 });
 
@@ -432,8 +432,8 @@
 
 
                     },
-                    error: function () {
-                        alert("통신에러");
+                    error: function (error) {
+                        alert("서버에러" + error.status + " " + error.responseText);
                     }
                 });
             }
@@ -613,16 +613,16 @@
                     data: formData,
                     success: function (result) {
                         console.log(result);
-                        if(result.msg) {
-                            alert(result.msg);
-                        }
+                        // if(result.msg) {
+                        //     alert(result.msg);
+                        // }
                         $("#modalUpsert").modal('hide');
                         listBoard();
                         
                        
                     },
-                    error: function () {
-                        alert("통신 에러");
+                    error: function (error) {
+                        alert("서버에러" + error.status + " " + error.responseText);
                     }
                 });
 

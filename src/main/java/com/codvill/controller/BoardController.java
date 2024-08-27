@@ -49,53 +49,58 @@ public class BoardController {
 
     @PostMapping("/list")
     @ResponseBody
-    public Object list(@RequestBody Map<String, Object> param) {
+    public ResponseEntity<Object> list(@RequestBody Map<String, Object> param) {
         System.out.println("list 작동");
         System.out.println(param);
 
-        JSONObject obj =new JSONObject();
-        obj = bs.boardList(param);
+        try {
+            JSONObject obj =new JSONObject();
+            obj = bs.boardList(param);
+            
+            return ResponseEntity.ok(obj);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
         
-        return obj;
     }
 
     @PostMapping("/get")
     @ResponseBody
-    public Object get(@RequestBody Map<String, Object> param) {
+    public ResponseEntity<Object> get(@RequestBody Map<String, Object> param) {
         System.out.println("get 작동");
         System.out.println(param);
 
-        JSONObject obj =new JSONObject();
-        obj = bs.boardGet(param);
-        // JSONObject data = new JSONObject();
-        System.out.println(obj);
+        try {
+            JSONObject obj =new JSONObject();
+            obj = bs.boardGet(param);
 
-        return obj;
+            return ResponseEntity.ok(obj);
+            
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+
     }
 
 
     @PostMapping("/insert")
     @ResponseBody
-    public Object insert(@RequestParam("files") MultipartFile[] files, @RequestParam("param") String param) throws Exception{
+    public ResponseEntity<Object> insert(@RequestParam("files") MultipartFile[] files, @RequestParam("param") String param) {
         System.out.println("insert 작동");
         System.out.println(param);
+        try {
+            JSONParser parser = new JSONParser();
+            JSONObject pramObj = new JSONObject();
+            pramObj = (JSONObject) parser.parse(param);
 
-        // for (MultipartFile file : files) {
-        //     System.out.println("파일목록");
-        //     String originFileName = file.getOriginalFilename();
-        //     System.out.println("originFileName : " + originFileName);
-        // }
+            bs.boardInsert(pramObj, files);
 
-        //param 형식변경
-        JSONParser parser = new JSONParser();
-		JSONObject pramObj = new JSONObject();
-        pramObj = (JSONObject) parser.parse(param);
+            return ResponseEntity.ok("게시글 등록완료");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
 
-        JSONObject obj = new JSONObject();
-        obj = bs.boardInsert(pramObj, files);
-
-
-        return obj;
+        
     }
 
     @PostMapping("/update")

@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.servlet.jsp.el.ELException;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.jsoup.Jsoup;
@@ -37,38 +39,46 @@ public class BoardService {
     @Autowired
     BoardDao bD;
 
-    public JSONObject boardList(Map<String, Object> param) {
+    public JSONObject boardList(Map<String, Object> param) throws Exception {
         
+        try {
+            JSONObject obj = bD.boardList(param);
+            return obj;
+            
+        } catch (Exception e) {
+            throw new Exception("List DB에러" , e);
+        }
+
         //게시판 리스트 정보
-        JSONObject obj = bD.boardList(param);
-
-        return obj;
     }
 
-    public JSONObject boardGet(Map<String, Object> param) {
-        JSONObject obj = bD.boardGet(param);
-
-        return obj;
+    public JSONObject boardGet(Map<String, Object> param) throws Exception {
+        try {
+            JSONObject obj = bD.boardGet(param);
+            return obj;
+            
+        } catch (Exception e) {
+            throw new Exception("Get DB에러" , e);
+        }
     }
 
-    public JSONObject boardInsert(Map<String, Object> param, MultipartFile[] files) {
+    public void boardInsert(Map<String, Object> param, MultipartFile[] files) throws Exception {
         JSONObject result=new JSONObject();
 
-        //처리 결과 확인값
-        Map<String, Integer> msg = new HashMap<>();
+        try {
+            //게시글 DB insert
+            bD.boardInsert(param);
 
-        int resultBoard = 0;
-        int resultFileInsert = 0;
-        int resultFileSave = 0;
-
-        //게시글 DB insert
-        resultBoard=bD.boardInsert(param);
-
-        // insert 된 게시글 id값 가져오기 (파일DB저장 처리용)
-        String board_id = bD.getLast();
-
+        } catch (Exception e) {
+            System.err.println("insert board DB에러: " + e.getMessage());
+            throw new Exception("Insert board DB에러" , e);
+        }
+        
+        
         //파일저장
         if(files.length > 0) {
+            // insert 된 게시글 id값 가져오기 (파일DB저장 처리용)
+            String board_id = bD.getLast();
             for (MultipartFile file : files) {
                 System.out.println("파일업로드처리");
                 System.out.println(file.toString());
@@ -90,12 +100,17 @@ public class BoardService {
                     // 파일저장
                     Path filePath = Paths.get(uploadPath, fileSaveName);
                     Files.write(filePath, file.getBytes());
-                    // DB 저장
-                    int resultInsert = bD.fileInsert(realFileName, uuid+"", fileExtension, uploadPath, board_id);
-    
-                    if(resultInsert == -1) {
-                        resultFileInsert = -1;
+
+                    try {
+                        // DB 저장
+                        bD.fileInsert(realFileName, uuid+"", fileExtension, uploadPath, board_id);
+                        
+                    } catch (Exception e) {
+                        System.err.println("파일 저장 DB에러: " + e.getMessage());
+                        throw new Exception("파일 저장 DB에러" , e);
                     }
+
+    
                     // // 콘솔 확인
                     // System.out.println();
                     // System.out.println("파일 확인");
@@ -103,26 +118,14 @@ public class BoardService {
                     // System.out.println();
     
                 } catch (IOException e) {
-                    resultFileSave = -1;
-                    e.printStackTrace();
+                    System.err.println("파일 저장 에러: " + e.getMessage());
+                    throw new Exception("파일 저장 에러" , e);
                 }
     
             }
         }
-
-        msg.put("BoardInsertError", resultBoard);
-        msg.put("fileInsertError", resultFileInsert);
-        msg.put("filesaveError", resultFileSave);
-
-        for (Map.Entry<String, Integer> entry : msg.entrySet()) {
-            if (entry.getValue() == -1) {
-                System.out.println("Key: " + entry.getKey());
-                result.put("msg", entry.getKey());
-            }
-        }
         
 
-        return result;
     }
 
     public JSONObject boardUpdate(Map<String, Object> param, MultipartFile[] files, String sessionUserId, String sessionAuth) { //{"user_id":"1","board_title":"2","file_id":["7","8","9"],"board_id":"10","board_content":"2"}

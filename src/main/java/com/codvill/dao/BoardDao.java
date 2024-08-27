@@ -150,11 +150,7 @@ public class BoardDao {
 
 		String sql = String.format("INSERT INTO tbl_board (board_id, board_title, board_content, user_id) " +
 				"VALUES ('%s', '%s', '%s', '%s')", id, title, content, userId);
-		try {
-			value = jt.update(sql);
-		} catch (Exception e) {
-			System.out.println("board Insert 에러 발생");
-		}
+		value = jt.update(sql);
 
 		return value;
 	}
@@ -215,11 +211,7 @@ public class BoardDao {
 				fileId, fileName,  fileExtension, uploadPath, board_id);
 
 		int value = -1;
-		try {
-			value = jt.update(sql);
-		} catch (Exception e) {
-			System.out.println("file insert 에러 발생");
-		}
+		jt.update(sql);
 
 		return value;
 	}
