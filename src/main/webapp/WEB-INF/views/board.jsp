@@ -32,7 +32,7 @@
                     <div class="row">
                         <div class="col px-5">
                             <div class="d-flex" role="search">
-                                <select id="searchType">
+                                <select id="searchType" onchange="changeSearchType()">
                                     <option value="board_title">제목</option>
                                     <option value="user_nickname">작성자</option>
                                 </select>
@@ -241,7 +241,6 @@
             let pageCurrent = 1;
             //검색 저장
             let searchSelect = ""; //검색어
-            let searchTypeSelect = ""; //검색타입
 
             //토스트 에디터 (등록, 수정시 내용을 가져올수있음)
             let textEditor = "";
@@ -268,7 +267,6 @@
                 if(search) {
                     pageCurrent = 1; //검색누를경우 1페이지로 이동
                     searchSelect = $("#search").val(); //검색어 저장
-                    searchTypeSelect = $("#searchType").val(); //검색타입 저장
                 }
 
                 //몇개씩 볼건지 선택
@@ -277,7 +275,7 @@
                 param = {
                     offset: limitPage * (pageCurrent - 1), //현재 보고있는 페이지
                     listSize: limitPage, // 가져올 데이터의 개수
-                    searchType: searchTypeSelect,
+                    searchType: $("#searchType").val(),
                     search: searchSelect
                 };
 
@@ -338,13 +336,23 @@
                     alert("마지막 페이지입니다");
                     return;
                 }
-
+                $("#search").val(searchSelect);
                 pageCurrent = number;
                 listBoard();
             }
 
             // 5, 10개 씩 보기 변경
             function changeLimit() {
+                $("#search").val("");
+                searchSelect="";
+                pageCurrent = 1;
+                listBoard();
+            }
+
+            // 검색타입변경
+            function changeSearchType() {
+                $("#search").val("");
+                searchSelect="";
                 pageCurrent = 1;
                 listBoard();
             }
@@ -646,17 +654,13 @@
                     contentType: "application/json",
                     data: JSON.stringify(param),
                     success: function (result) {
-
-                        if(result.msg) {
-                            alert(result.msg);
-                        }
-
+                        console.log(result);
                         $("#modalGet").modal('hide');
                         listBoard();
 
                     },
-                    error: function () {
-                        alert("통신에러");
+                    error: function (error) {
+                        alert("서버에러" + error.status + " " + error.responseText);
                     }
                 });
             }

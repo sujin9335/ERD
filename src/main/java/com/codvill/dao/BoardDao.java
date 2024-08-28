@@ -139,8 +139,7 @@ public class BoardDao {
 		return result;
 	}
 
-	public int boardInsert(Map<String, Object> param) {
-		int value = -1;
+	public void boardInsert(Map<String, Object> param) {
 		UUID uuid = UUID.randomUUID();
 
 		String id = uuid.toString();
@@ -150,13 +149,11 @@ public class BoardDao {
 
 		String sql = String.format("INSERT INTO tbl_board (board_id, board_title, board_content, user_id) " +
 				"VALUES ('%s', '%s', '%s', '%s')", id, title, content, userId);
-		value = jt.update(sql);
+		jt.update(sql);
 
-		return value;
 	}
 
-	public int boardUpdate(Map<String, Object> param) { //{"user_id":"1","board_title":"2","file_id":["7","8","9"],"board_id":"10","board_content":"2"}
-		int value = -1;
+	public void boardUpdate(Map<String, Object> param) { //{"user_id":"1","board_title":"2","file_id":["7","8","9"],"board_id":"10","board_content":"2"}
 
 		String title =  param.get("board_title").toString();
 		String content = param.get("board_content").toString();
@@ -166,13 +163,7 @@ public class BoardDao {
 				"SET board_title = '%s', board_content = '%s' " +
 				"WHERE board_id = '%s'", title, content, id);
 
-		try {
-			value = jt.update(sql);
-		} catch (Exception e) {
-			System.out.println("board update 에러 발생");
-		}
-
-		return value;
+		jt.update(sql);
 	}
 
 	public int boardDel(Map<String, Object> param) {
@@ -184,11 +175,8 @@ public class BoardDao {
 
 		// System.out.println(sql);
 
-		try {
-			value = jt.update(sql);
-		} catch (Exception e) {
-			System.out.println("board delete 에러 발생");
-		}
+		value = jt.update(sql);
+		
 
 		return value;
 	}
@@ -203,17 +191,15 @@ public class BoardDao {
 		return jt.queryForObject(sql, String.class);
 	}
 
-	public int fileInsert(String fileName, String fileId, String fileExtension, String uploadPath,
+	public void fileInsert(String fileName, String fileId, String fileExtension, String uploadPath,
 			String board_id) {
 		String sql = String.format(
 				"INSERT INTO tbl_file (file_id, file_name, file_extension, file_path, board_id) " +
 						"VALUES ('%s', '%s', '%s', '%s', '%s')",
 				fileId, fileName,  fileExtension, uploadPath, board_id);
 
-		int value = -1;
 		jt.update(sql);
 
-		return value;
 	}
 
 	public Map<String, Object> fileGet(String id) {
@@ -244,17 +230,12 @@ public class BoardDao {
 
 	public int delFile(String id) {
 		System.out.println("delFile 작동");
+		int value = -1;
 
 		String sql = String.format("DELETE FROM tbl_file " +
 				"WHERE file_id = '%s'", id);
 
-		int value = -1;
-		try {
-			value = jt.update(sql);
-		} catch (Exception e) {
-			System.out.println("file delete 에러 발생");
-		}
-
+		value = jt.update(sql);
 		return value;
 	}
 

@@ -1,6 +1,7 @@
 package com.codvill.controller;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -73,9 +74,7 @@ public class BoardController {
         try {
             JSONObject obj =new JSONObject();
             obj = bs.boardGet(param);
-
             return ResponseEntity.ok(obj);
-            
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
@@ -105,7 +104,7 @@ public class BoardController {
 
     @PostMapping("/update")
     @ResponseBody
-    public Object update(@RequestParam("files") MultipartFile[] files, @RequestParam("param") String param, HttpSession session) throws Exception{
+    public ResponseEntity<Object> update(@RequestParam("files") MultipartFile[] files, @RequestParam("param") String param, HttpSession session) {
         System.out.println("update 작동");
 
         //세션 불러오기
@@ -113,22 +112,25 @@ public class BoardController {
         String userId= userInfo.get("user_id").toString();
         String userAuth= userInfo.get("user_auth").toString();
 
-        //param 형식변경
-        JSONParser parser = new JSONParser();
-		JSONObject pramObj = new JSONObject();
-        pramObj = (JSONObject) parser.parse(param);
-        System.out.println(pramObj);
+        try {
+            //param 형식변경
+            JSONParser parser = new JSONParser();
+            JSONObject pramObj = new JSONObject();
+            pramObj = (JSONObject) parser.parse(param);
+
+            bs.boardUpdate(pramObj, files, userId, userAuth);
+
+            return ResponseEntity.ok("게시글 수정완료");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
         
-        //게시글 update
-        JSONObject obj = new JSONObject();
-        obj=bs.boardUpdate(pramObj, files, userId, userAuth);
         
-        return obj;
     }
 
     @PostMapping("/del")
     @ResponseBody
-    public Object del(@RequestBody Map<String, Object> param, HttpSession session) {
+    public ResponseEntity<Object> del(@RequestBody Map<String, Object> param, HttpSession session) {
         System.out.println("del 작동");
         System.out.println(param);
 
@@ -137,44 +139,18 @@ public class BoardController {
         String userId= userInfo.get("user_id").toString();
         String userAuth= userInfo.get("user_auth").toString();
 
-        // JSONObject data = new JSONObject();
-        JSONObject obj = bs.boardDel(param, userId, userAuth);
+        try {
+            bs.boardDel(param, userId, userAuth);
 
-        return obj;
+            return ResponseEntity.ok(Collections.singletonMap("message", "게시글 삭제완료"));
+            // return ResponseEntity.ok("게시글 삭제완료"); //프론트에서 받는타입을 json으로 정해서 위에처럼 처리해야됨 
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+
     }
 
     
-    @PostMapping("/fileUpload")
-    @ResponseBody
-    public Object fileUpload(@RequestParam("files") MultipartFile[] files, @RequestParam("param") String param) throws Exception{
-        System.out.println("파일업로드");
-        System.out.println(Arrays.toString(files));
-
-        JSONParser parser = new JSONParser();
-		JSONObject jo = new JSONObject();
-        jo = (JSONObject) parser.parse(param);
-
-        //게시글 insert
-        //bs.boardInsert(jo, files);
-
-        //System.out.println(jo.toString());
-
-        if (files.length == 0) {
-            System.out.println("데이터없음");
-        }
-
-        System.out.println("파일업로드처리완");
-        JSONObject data = new JSONObject();
-        // JSONObject objData = (JSONObject) bs.fileUpload(param);
-        // System.out.println(objData);
-
-        
-
-
-        return data;
-    }
-
-
     //파일 다운로드
     @GetMapping("/fileDown/{id}")
     @ResponseBody

@@ -15,11 +15,16 @@ public class UserService {
     @Autowired
     UserDao ud;
 
-    public Object list(Map<String, Object> param) {
+    public JSONObject list(Map<String, Object> param) throws Exception {
         JSONObject obj=new JSONObject();
 
-        obj=(JSONObject) ud.list(param);
-
+        try {
+            obj=ud.list(param);
+            
+        } catch (Exception e) {
+            System.err.println("list DB에러: " + e.getMessage());
+            throw new RuntimeException("list DB에러", e);
+        }
 
         return obj;
     }

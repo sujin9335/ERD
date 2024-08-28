@@ -50,42 +50,35 @@ public class UserDao {
 		}
 	}//
 
-	public Object list(Map<String, Object> param) {
+	public JSONObject list(Map<String, Object> param) {
 		JSONObject result = new JSONObject();
 
-		int offset = (Integer) param.get("offset");
-		int listSize = (Integer) param.get("listSize");
-
-		String searchType = (String) param.get("searchType");
+		String offset = param.get("offset").toString();
+		String listSize = param.get("listSize").toString();
+		String searchType = param.get("searchType").toString();
 
 		// 검색어 없을경우 처리
 		String search = (String) param.get("search");
-		if (searchType == null) {
+		if (searchType == null || searchType.equals("")) {
 			searchType = "user_name";
-		}
-		if (search == null) {
-			search = "";
 		}
 
 		// 데이터 조회
-		String sqlFist = "SELECT " +
-				"user_id, " +
-				"user_login_id, " +
-				"user_name, " +
-				"user_mail, " +
-				"user_tel, " +
-				"user_auth, " +
-				"user_use, " +
-				"user_lock_cnt ";
-
-		String sqlLast = String.format(
+		String sql = String.format(
+				"SELECT " +
+					"user_id, " +
+					"user_login_id, " +
+					"user_name, " +
+					"user_mail, " +
+					"user_tel, " +
+					"user_auth, " +
+					"user_use, " +
+					"user_lock_cnt " +
 				"from tbl_user " +
 						"WHERE %s LIKE '%%%s%%' " +
 						"ORDER BY user_id DESC " +
-						"LIMIT %d OFFSET %d ",
+						"LIMIT %s OFFSET %s ",
 				searchType, search, listSize, offset);
-
-		String sql = sqlFist + sqlLast;
 
 		List<Map<String, Object>> list = jt.queryForList(sql);
 

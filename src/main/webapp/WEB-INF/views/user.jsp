@@ -97,113 +97,189 @@
                                 </div>
                             </div>
                         </div>
-
-
-
                     </div>
+                </div>
+            </div>
 
 
+            <div class="modal fade" id="modalGet" data-bs-backdrop="static" data-bs-keyboard="false"
+                tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-custom">
+                    <div class="modal-content">
 
-                    <div class="modal fade" id="staticBack" data-bs-backdrop="static" data-bs-keyboard="false"
-                        tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered modal-custom">
-                            <div class="modal-content">
+                        <div class="modal-body">
+                            <div class="container text-center">
+                                <div class="row">
 
-                                <div class="modal-body">
-                                    <div class="container text-center" id="modal">
-                                        <div class="row">
+                                    <div class="col-2 pt-3">
+                                        <h3>아이디</h3>
+                                    </div>
+                                    <div class="col-8 text-start px-4 pt-3" id="login_id">
+                                        admin
+                                    </div>
 
-                                            <div class="col-2 pt-3">
-                                                <h3>아이디</h3>
-                                            </div>
-                                            <div class="col-8 text-start px-4 pt-3 in-title" id="login_id">
-                                                admin
-                                            </div>
+                                    <div class="col-1 editDel">
+                                        <div id="id" style="display: none;"></div>
+                                        <div id="flag" style="display: none;"></div>
+                                    </div>
 
-                                            <div class="col-1 editDel">
-                                                <div id="id" style="display: none;"></div>
-                                                <div id="flag" style="display: none;"></div>
-                                            </div>
-
-                                            <div class="col-1">
-                                                <!-- <button type="button" class="btn btn-dark" data-bs-dismiss="modal" onclick="closeModal()">닫기</button> -->
-                                                <button type="button" class="btn btn-dark"
-                                                    data-bs-dismiss="modal">닫기</button>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-2 pt-3 pw" style="display: none;">
-                                                <h3>비밀번호</h3>
-                                            </div>
-                                            <div class="col-10 text-start px-4 pt-3 in-title pw" id="pw"
-                                                style="display: none;">
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-2 pt-3">
-                                                <h3>이름</h3>
-                                            </div>
-                                            <div class="col-10 text-start p-4 " id="name">
-                                                김수진
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-2 pt-3">
-                                                <h3>핸드폰번호</h3>
-                                            </div>
-                                            <div class="col-10 text-start p-4" id="tel">
-                                                010-9335-6987
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-2 pt-3">
-                                                <h3>이메일</h3>
-                                            </div>
-                                            <div class="col-10 text-start p-4" id="mail">
-                                                sujin_78@naver.com
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-2 pt-3">
-                                                <h3>권한</h3>
-                                            </div>
-                                            <div class="col-3 text-start p-4">
-                                                <select class="form-select form-select-sm"
-                                                    aria-label="Small select example" id="auth">
-                                                    <option value="1" selected>일반유저</option>
-                                                    <option value="0">관리자</option>
-                                                </select>
-                                            </div>
-                                            <div class="col-2 pt-3 del">
-                                                <h3>잠금해제</h3>
-                                            </div>
-                                            <div class="col-3 text-start p-4 form-switch del" id="use">
-                                                <input class="form-check-input ms-4" type="checkbox" role="switch"
-                                                    id="flexSwitchCheckDefault">
-                                            </div>
-                                            <div class="col-1 pt-2 btnDel">
-                                                <button type="button" class="btn btn-info edit"
-                                                    onclick="editUpdate()">수정</button>
-                                            </div>
-                                            <div id="chBtn" class="col-1 pt-2 btnDel">
-                                                <button type="button" class="btn btn-warning"
-                                                    onclick="del()">삭제</button>
-                                            </div>
-                                        </div>
+                                    <div class="col-1">
+                                        <!-- <button type="button" class="btn btn-dark" data-bs-dismiss="modal" onclick="closeModal()">닫기</button> -->
+                                        <button type="button" class="btn btn-dark"
+                                            data-bs-dismiss="modal">닫기</button>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-2 pt-3 pw" style="display: none;">
+                                        <h3>비밀번호</h3>
+                                    </div>
+                                    <div class="col-10 text-start px-4 pt-3 in-title pw" id="pw"
+                                        style="display: none;">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-2 pt-3">
+                                        <h3>이름</h3>
+                                    </div>
+                                    <div class="col-10 text-start p-4 " id="name">
+                                        김수진
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-2 pt-3">
+                                        <h3>핸드폰번호</h3>
+                                    </div>
+                                    <div class="col-10 text-start p-4" id="tel">
+                                        010-9335-6987
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-2 pt-3">
+                                        <h3>이메일</h3>
+                                    </div>
+                                    <div class="col-10 text-start p-4" id="mail">
+                                        sujin_78@naver.com
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-2 pt-3">
+                                        <h3>권한</h3>
+                                    </div>
+                                    <div class="col-3 text-start p-4">
+                                        <select class="form-select form-select-sm"
+                                            aria-label="Small select example" id="auth">
+                                            <option value="1" selected>일반유저</option>
+                                            <option value="0">관리자</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-2 pt-3 del">
+                                        <h3>잠금해제</h3>
+                                    </div>
+                                    <div class="col-3 text-start p-4 form-switch del" id="use">
+                                        <input class="form-check-input ms-4" type="checkbox" role="switch"
+                                            id="flexSwitchCheckDefault">
+                                    </div>
+                                    <div class="col-1 pt-2 btnDel">
+                                        <button type="button" class="btn btn-info edit"
+                                            onclick="editUpdate()">수정</button>
+                                    </div>
+                                    <div id="chBtn" class="col-1 pt-2 btnDel">
+                                        <button type="button" class="btn btn-warning"
+                                            onclick="del()">삭제</button>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-
                 </div>
-
-                <script>
-                    
+            </div>
 
 
-                </script>
+
+            <script>
+                //현재 페이지
+                let pageCurrent = 1;
+                //검색 저장
+                let searchSelect = ""; //검색어
+
+                // 리스트 요청
+                window.onload = function () {
+                    listUser();
+                }
+
+                function listUser(search) {
+
+                    //테이블 초기화
+                    $("#tab tbody").empty();
+                    //페이징 초기화
+                    $("#paging").empty();
+
+                    var param = {};
+
+                     //검색으로 리스트 불렀는지 확인
+                    if(search) {
+                        pageCurrent = 1; //검색누를경우 1페이지로 이동
+                        searchSelect = $("#search").val(); //검색어 저장
+                    }
+
+                    //몇개씩 볼건지 선택
+                    var limitPage = $("#limitPage").val();
+
+                    param = {
+                        offset: limitPage * (pageCurrent - 1), //현재 보고있는 페이지
+                        listSize: limitPage, // 가져올 데이터의 개수
+                        searchType: $("#searchType").val(),
+                        search: searchSelect
+                    };
+
+                    $.ajax({
+                        url: "/user/list",
+                        type: "POST",
+                        dataType: "json",
+                        contentType: "application/json",
+                        data: JSON.stringify(param),
+                        success: function (result) {
+                            console.log(result);
+                            
+                            // if (result.data.length > 0) {
+                            //     // alert("통신성공");
+
+                            //     var totalPage = Math.ceil(result.total / limitPage); //보여지는 총페이지
+                            //     paging(pageCurrent, totalPage); //페이징 함수
+
+                            //     //총 갯수 출력
+                            //     $("#total").text("총:" + result.total + "개")
+                            //     //리스트 출력
+                            //     for (var i = 0; i < result.data.length; i++) {
+                            //         var index = i + 1 + param.offset;
+                            //         var listBoard = "<tr>" +
+                            //             "<td class='col' data-bs-toggle='modal' data-bs-target='#modalGet' onclick='get(\"" + result.data[i].board_id + "\")'>" + index + "</td>" +
+                            //             "<td class='col' data-bs-toggle='modal' data-bs-target='#modalGet' onclick='get(\"" + result.data[i].board_id + "\")'>" + escapeHtml(result.data[i].board_title) + "</td>" +
+                            //             "<td class='col' data-bs-toggle='modal' data-bs-target='#modalGet' onclick='get(\"" + result.data[i].board_id + "\")'>" + result.data[i].user_nickname + "</td>" +
+                            //             "<td class='col' data-bs-toggle='modal' data-bs-target='#modalGet' onclick='get(\"" + result.data[i].board_id + "\")'>" + result.data[i].board_view + "</td>" +
+                            //             "<td class='col' data-bs-toggle='modal' data-bs-target='#modalGet' onclick='get(\"" + result.data[i].board_id + "\")'>" + result.data[i].board_date + "</td>" +
+                            //             "</tr>";
+                            //         $("#tab tbody").append(listBoard);
+                            //     }
+
+                            // } else {
+                            //     var msg = "<tr>" +
+                            //         "<td colspan='6' >게시글이 존재하지 않습니다</td>" +
+                            //         "</tr>";
+                            //     $("#tab tbody").append(msg);
+
+                            // }
+                            
+                        },
+                        error: function (error) {
+                            alert("서버에러" + error.status + " " + error.responseText);
+                        }
+                    });
+
+                    }
+
+
+            </script>
 
     </body>
 
