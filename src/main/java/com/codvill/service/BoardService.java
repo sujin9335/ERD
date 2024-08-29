@@ -213,7 +213,7 @@ public class BoardService {
 
         //기존 첨부되있던 파일처리
         //==============================
-        //파일 삭제된거 관리(우선실행)
+        //파일 삭제된거 관리
         JSONArray fileFullnames=(JSONArray) param.get("file_id");
         
         if (fileFullnames.size() > 0) {
@@ -226,14 +226,14 @@ public class BoardService {
                     bD.delFile(fileId); //DB에서 파일삭제
                 } catch (Exception e) {
                     System.err.println("수정 file 기존del DB에러: " + e.getMessage());
-                    // throw new Exception("수정 file 기존del DB에러" , e); //파일 db삭제 멈추게됨
+                    throw new Exception("수정 file 기존del DB에러" , e); //파일 db삭제 멈추게됨
                 }
                 //파일 저장소에서 삭제
                 try {
                     fileDel(fileFullname);
                 } catch (Exception e) {
                     System.err.println("수정 file 기존del 에러: " + e.getMessage());
-                    // throw new Exception(" 수정file 기존del 에러" , e);
+                    throw new Exception(" 수정file 기존del 에러" , e);
                 }
             }
         }
@@ -261,9 +261,6 @@ public class BoardService {
             
         }
 
-        //저장소에 파일 삭제할 목록 미리 불러오기
-        List<Map<String, Object>> list=bD.fileList(param.get("board_id").toString());
-
         try {
             //게시글 삭제
             bD.boardDel(param);
@@ -273,42 +270,18 @@ public class BoardService {
             throw new Exception("board 삭제 DB에러" , e);
         }
         
-        if (!list.isEmpty()) {
-            //저장소 파일삭제
+        List<String> files=(List<String>) param.get("files");
+        for (String file : files) {
             try {
-                //폴더에서 파일삭제
-                fileDel(list);
+                fileDel(file);
             } catch (Exception e) {
                 System.err.println("삭제 file del 에러: " + e.getMessage());
             }
-    
-            
         }
-
 
 
     }
 
-    // public void fileDel(List<Map<String, Object>> list) {
-    //     //저장된 파일삭제 
-    //     if(list.size() > 0) {
-    //         for (Map<String,Object> map : list) {
-    //             String fileName=map.get("file_id").toString() + "." + map.get("file_extension").toString();
-
-    //             Path filePath = Paths.get(uploadPath, fileName).normalize().toAbsolutePath();
-    //             try {
-    //                 if (Files.deleteIfExists(filePath)) {
-    //                     System.out.println("File deleted successfully: " + filePath);
-    //                 } else {
-    //                     System.out.println("File not found: " + filePath);
-    //                 }
-    //             } catch (IOException e) {
-    //                 System.err.println("파일 삭제 에러: " + e.getMessage());
-    //             }
-    //         }
-    //     }
-
-    // }
 
     public void fileDel(String fileName) {
         //저장된 파일삭제 

@@ -106,6 +106,7 @@ public class BoardController {
     @ResponseBody
     public ResponseEntity<Object> update(@RequestParam("files") MultipartFile[] files, @RequestParam("param") String param, HttpSession session) {
         System.out.println("update 작동");
+        System.out.println(param);
 
         //세션 불러오기
         Map<String, Object> userInfo = (Map<String, Object>) session.getAttribute("userInfo");

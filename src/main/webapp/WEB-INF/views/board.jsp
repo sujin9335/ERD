@@ -644,8 +644,22 @@
                 if (!bool) {
                     return;
                 }
-                var param = {
-                    board_id: $("#getId").val()
+                var param = {};
+                //삭제할 파일데이터 추가
+                // 모든 .getFile 요소를 선택
+                var getFileElements = $('.getFile');
+
+                // data-value 속성을 배열로 저장
+                var dataValues = getFileElements.map(function() {
+                    return $(this).data('value');
+                }).get();
+
+                console.log(dataValues);
+                
+
+                param = {
+                    board_id: $("#getId").val(),
+                    files: dataValues
                 };
 
                 $.ajax({
