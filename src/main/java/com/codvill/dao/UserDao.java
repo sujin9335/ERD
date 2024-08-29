@@ -50,7 +50,7 @@ public class UserDao {
 		}
 	}//
 
-	public JSONObject list(Map<String, Object> param) {
+	public JSONObject userList(Map<String, Object> param) {
 		JSONObject result = new JSONObject();
 
 		String offset = param.get("offset").toString();
@@ -73,7 +73,8 @@ public class UserDao {
 					"user_tel, " +
 					"user_auth, " +
 					"user_use, " +
-					"user_lock_cnt " +
+					"user_lock_cnt, " +
+					"user_nickname " +
 				"from tbl_user " +
 						"WHERE %s LIKE '%%%s%%' " +
 						"ORDER BY user_id DESC " +

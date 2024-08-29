@@ -416,8 +416,8 @@
                         //파일 리스트
                         $("#modalGet #getFiles").empty(); //초기화
                         $.each(result.files, function (index, value) {
-                            var file = "<div class='getFile' data-value='" + value.file_id + "' style='cursor:pointer; display: flex; align-items: center;'>" + 
-                                            "<span onclick=\"location.href='/board/fileDown/" + value.file_id + "'\">" + 
+                            var file = "<div class='getFile' data-value='" + value.file_id + "." + value.file_extension+ "' style='cursor:pointer; display: flex; align-items: center;'>" + 
+                                            "<span onclick=\"location.href='/board/fileDown/" + value.file_id + "." + value.file_extension + "/" + value.file_name +"'\">" + 
                                             value.file_name + "." + value.file_extension + 
                                             "</span>" +
                                             "<button class='deleteFile' style='display: none;'>삭제</button>" +
@@ -586,8 +586,9 @@
                 var encoder = new TextEncoder();
                 var encoded = encoder.encode(content);
                 console.log(encoded.length);
-                if (encoded.length > 2000) {
-                    alert("내용은 2000바이트 이하입니다");
+                if (encoded.length > 800) {
+                    alert("내용은 800바이트 이하입니다");
+                    return;
                 }
                 
                 param = {

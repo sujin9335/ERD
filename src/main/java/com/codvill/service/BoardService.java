@@ -54,19 +54,41 @@ public class BoardService {
     }
 
     public JSONObject boardGet(Map<String, Object> param) throws Exception {
+        JSONObject obj=new JSONObject();
+
+
         try {
-            JSONObject obj = bD.boardGet(param);
-            return obj;
-            
+            //게시글 DB 조회 
+            Map<String, Object> get = bD.boardGet(param);
+            obj.put("data", get);
         } catch (Exception e) {
             System.err.println("Get DB에러: " + e.getMessage());
             throw new Exception("Get DB에러" , e);
         }
+
+        try {
+            //게시글 조회수 증가
+            bD.boardViewCountAdd(param);
+        } catch (Exception e) {
+            System.err.println("Get 게시글 조회수증가 에러: " + e.getMessage());
+            throw new Exception("Get  게시글 조회수증가 에러" , e);
+        }
+
+        try {
+            //파일 리스트 DB조회
+            List<Map<String, Object>> files = bD.fileListGet(param);
+            obj.put("files", files);
+        } catch (Exception e) {
+            System.err.println("Get 파일 DB에러: " + e.getMessage());
+            throw new Exception("Get 파일 DB에러" , e);
+        }
+
+        return obj;
     }
 
     public void boardInsert(Map<String, Object> param, MultipartFile[] files) throws Exception {
-        JSONObject result=new JSONObject();
 
+        //게시글 파일 유효성 검사
         boardCheck(param, files);
 
         try {
@@ -81,8 +103,18 @@ public class BoardService {
         
         //파일저장
         if(files.length > 0) {
-            // insert 된 게시글 id값 가져오기 (파일DB저장 처리용)
-            String board_id = bD.getLast();
+            String board_id = "";
+
+            try {
+                // insert 된 게시글 id값 가져오기 (파일DB저장 처리용)
+                board_id = bD.getLast();
+    
+            } catch (Exception e) {
+                System.err.println("insert board_id DB에러: " + e.getMessage());
+                throw new Exception("Insert board_id DB에러" , e);
+            }
+
+            //파일 저장, DB저장
             fileSave(files, board_id);
         }
         
@@ -98,8 +130,8 @@ public class BoardService {
             throw new Exception("제목의 길이는 1자 이상 10자 이하여야 합니다.");
         }
 
-        if (content == null || content.getBytes().length > 2000) {
-            throw new Exception("내용은 2000바이트 이하여야 합니다.");
+        if (content == null || content.getBytes().length > 800) {
+            throw new Exception("내용은 800바이트 이하여야 합니다.");
         }
 
         long maxSize = 3 * 1024 * 1024; // 3MB in bytes
@@ -156,20 +188,17 @@ public class BoardService {
     }
 
     public void boardUpdate(Map<String, Object> param, MultipartFile[] files, String sessionUserId, String sessionAuth) throws Exception { //{"user_id":"1","board_title":"2","file_id":["7","8","9"],"board_id":"10","board_content":"2"}
-        JSONObject result=new JSONObject();
-
-
         
+        //게시글 파일 유효성 검사
+        boardCheck(param, files);
+
         //세션 유저 확인
         String userId=bD.boardGetUserId(param);
         if(!sessionAuth.equals("0")) {
             if (!userId.equals(sessionUserId)) {
                 throw new Exception("유저 불일치");
             }
-            
         }
-
-        boardCheck(param, files);
 
         try {
             //게시글 업데이트
@@ -185,33 +214,27 @@ public class BoardService {
         //기존 첨부되있던 파일처리
         //==============================
         //파일 삭제된거 관리(우선실행)
-        //삭제할 파일 id String[] 저장
-        JSONArray id=(JSONArray) param.get("file_id");
-
-        if (id.size() > 0) {
-            String[] fileIds = new String[id.size()];
-            for (int i = 0; i < id.size(); i++) {
-                fileIds[i] = (String) id.get(i);
-            }
-    
-            //파일id로 파일 리스트 가져오기
-            List<Map<String, Object>> fileDelList = new ArrayList<>();
-            for (String fileId : fileIds) {
-                Map<String, Object> map = bD.fileGet(fileId);
-                fileDelList.add(map);
+        JSONArray fileFullnames=(JSONArray) param.get("file_id");
+        
+        if (fileFullnames.size() > 0) {
+            for (int i = 0; i < fileFullnames.size(); i++) {
+                //파일 명, 확장자 분리
+                String fileFullname = (String) fileFullnames.get(i);
+                String fileId = fileFullname.substring(0, fileFullname.lastIndexOf('.')); // 파일 id
+                //파일 DB에서 삭제
                 try {
                     bD.delFile(fileId); //DB에서 파일삭제
                 } catch (Exception e) {
                     System.err.println("수정 file 기존del DB에러: " + e.getMessage());
-                    // throw new Exception("수정 file 기존del DB에러" , e);
+                    // throw new Exception("수정 file 기존del DB에러" , e); //파일 db삭제 멈추게됨
                 }
-            }
-            try {
-                //폴더에서 파일삭제
-                fileDel(fileDelList);
-            } catch (Exception e) {
-                System.err.println("수정 file 기존del 에러: " + e.getMessage());
-                // throw new Exception(" 수정file 기존del 에러" , e);
+                //파일 저장소에서 삭제
+                try {
+                    fileDel(fileFullname);
+                } catch (Exception e) {
+                    System.err.println("수정 file 기존del 에러: " + e.getMessage());
+                    // throw new Exception(" 수정file 기존del 에러" , e);
+                }
             }
         }
         //==============================
@@ -266,59 +289,57 @@ public class BoardService {
 
     }
 
-    public void fileDel(List<Map<String, Object>> list) {
+    // public void fileDel(List<Map<String, Object>> list) {
+    //     //저장된 파일삭제 
+    //     if(list.size() > 0) {
+    //         for (Map<String,Object> map : list) {
+    //             String fileName=map.get("file_id").toString() + "." + map.get("file_extension").toString();
+
+    //             Path filePath = Paths.get(uploadPath, fileName).normalize().toAbsolutePath();
+    //             try {
+    //                 if (Files.deleteIfExists(filePath)) {
+    //                     System.out.println("File deleted successfully: " + filePath);
+    //                 } else {
+    //                     System.out.println("File not found: " + filePath);
+    //                 }
+    //             } catch (IOException e) {
+    //                 System.err.println("파일 삭제 에러: " + e.getMessage());
+    //             }
+    //         }
+    //     }
+
+    // }
+
+    public void fileDel(String fileName) {
         //저장된 파일삭제 
-        if(list.size() > 0) {
-            for (Map<String,Object> map : list) {
-                String fileName=map.get("file_id").toString() + "." + map.get("file_extension").toString();
-
-                Path filePath = Paths.get(uploadPath, fileName).normalize().toAbsolutePath();
-                try {
-                    if (Files.deleteIfExists(filePath)) {
-                        System.out.println("File deleted successfully: " + filePath);
-                    } else {
-                        System.out.println("File not found: " + filePath);
-                    }
-                } catch (IOException e) {
-                    System.err.println("파일 삭제 에러: " + e.getMessage());
-                }
+        Path filePath = Paths.get(uploadPath, fileName).normalize().toAbsolutePath();
+        try {
+            if (Files.deleteIfExists(filePath)) {
+                System.out.println("File deleted successfully: " + filePath);
+            } else {
+                System.out.println("File not found: " + filePath);
             }
+        } catch (IOException e) {
+            System.err.println("파일 삭제 에러: " + e.getMessage());
         }
-
     }
 
     
 
-    public ResponseEntity<byte[]> fileDown(String id) {
-        Map<String, Object> map = new HashMap<>();
+    public ResponseEntity<byte[]> fileDown(String fullSaveName, String name) {
         ResponseEntity<byte[]> entity = null;
-        try {
-            // JSONObject obj=new JSONObject();
-            map = bD.fileGet(id);
-            // System.out.println(list);
-            
-        } catch (Exception e) {
-            System.err.println("다운로드 file 정보 DB에러: " + e.getMessage());
-            HttpHeaders header = new HttpHeaders();
-            entity = new ResponseEntity<>("다운로드 file 정보 DB에러".getBytes(), header, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
 
-
-
-       
+        //fullName이 id.확장자 여서 확장자 분리
+        String fileExtension = fullSaveName.substring(fullSaveName.lastIndexOf('.') + 1);
 
         //원래 파일명
-        String fileName = (String) map.get("file_name")+ "."
-                + (String) map.get("file_extension");
+        String fileName = name+ "." + fileExtension;
 
-        //저장 파일명
-        String savefileName = id+"."+(String) map.get("file_extension");
+        System.out.println(fullSaveName);
+        System.out.println(name);
 
-        System.out.println(fileName);
-        System.out.println(savefileName);
-
-        // 파일이 저장된 경로(테이블의 경로값 사용해서 다운로드 해봄)
-        String savename = (String)map.get("file_path")+"\\"+savefileName;
+        // 파일이 저장된 경로
+        String savename = uploadPath+"\\"+fullSaveName;
         // String savename = "C:\\upload\\파일2^!78.txt";
         File file = new File(savename);
 

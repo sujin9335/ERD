@@ -103,41 +103,44 @@ public class BoardDao {
 
 	}
 
-	public JSONObject boardGet(Map<String, Object> param) {
-		JSONObject result = new JSONObject();
+	public Map<String, Object> boardGet(Map<String, Object> param) {
+		Map<String, Object> result = new HashMap<>();
 		String id = param.get("board_id").toString();
 
-		// 조회수 증가
-		String sql = String.format("UPDATE tbl_board " +
-				"SET board_view = (select board_view from tbl_board where board_id = '%s')+1 " +
-				"WHERE board_id = '%s'", 
-				id, id);
-		jt.queryForList(sql);
-		// System.out.println("조회수");
-		// System.out.println(sql);
-
 		// get
-		sql = String.format("SELECT board_id, board_title, board_content, tb.user_id, DATE_FORMAT(board_date, '%%Y-%%m-%%d') AS board_date, board_view, tu.user_nickname " +
+		String sql = String.format(
+			"SELECT board_id, board_title, board_content, tb.user_id, DATE_FORMAT(board_date, '%%Y-%%m-%%d') AS board_date, board_view, tu.user_nickname " +
 				"FROM tbl_board tb " +
 				"inner join tbl_user tu " +
 				"on tb.user_id = tu.user_id " +
 				"WHERE board_id = '%s'",
 				id);
-		Map<String, Object> get = jt.queryForMap(sql);
-
-		// 파일 조회
-		sql = String.format("select * " +
-				"from tbl_file where board_id='%s'", 
-				id);
-		List<Map<String, Object>> files = jt.queryForList(sql);
-		System.out.println(sql);
-		System.out.println(files.toString());
-
-		result.put("data", get);
-		result.put("files", files);
-
+		result = jt.queryForMap(sql);
 		return result;
 	}
+
+	public void boardViewCountAdd(Map<String, Object> param) {
+
+		String id = param.get("board_id").toString();
+		String sql = String.format("UPDATE tbl_board " +
+				"SET board_view = (select board_view from tbl_board where board_id = '%s')+1 " +
+				"WHERE board_id = '%s'", 
+				id, id);
+		jt.update(sql);
+
+	}
+
+    public List<Map<String, Object>> fileListGet(Map<String, Object> param) {
+		List<Map<String, Object>> files = new ArrayList<>();
+
+		String id = param.get("board_id").toString();
+		String sql = String.format("select * " +
+				"from tbl_file where board_id='%s'", 
+				id);
+		files = jt.queryForList(sql);
+
+		return files;
+    }
 
 	public void boardInsert(Map<String, Object> param) {
 		UUID uuid = UUID.randomUUID();
@@ -228,15 +231,13 @@ public class BoardDao {
 		return list;
 	}
 
-	public int delFile(String id) {
+	public void delFile(String id) {
 		System.out.println("delFile 작동");
-		int value = -1;
 
 		String sql = String.format("DELETE FROM tbl_file " +
 				"WHERE file_id = '%s'", id);
 
-		value = jt.update(sql);
-		return value;
+		jt.update(sql);
 	}
 
 	public String boardGetUserId(Map<String, Object> param) {
@@ -255,5 +256,7 @@ public class BoardDao {
 		return result;
 		
 	}
+
+	
 
 }

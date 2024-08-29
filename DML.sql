@@ -5,22 +5,36 @@ select * from tbl_board tb ;
 delete * from tbl_board ;
 
 
-INSERT INTO tbl_board (board_title, board_content, user_id)
-VALUES ('<p>임시제목2</p>', '임시내용2', 2);
+INSERT INTO tbl_board (board_id ,board_title, board_content, user_id)
+VALUES ('019feb9a-1d76-4238-805b-da215ca133c6', '<p>임시제목2</p>', '임시내용2', '263d5a3f-82ab-4ff0-817a-77483353983c');
 
 INSERT INTO tbl_board (board_title, board_content, user_id)
-VALUES ('임시제목', '임시내용', 1);
+VALUES ('임시제목', '임시내용', '319b1008-c52a-42be-8d68-ec909f7fee5a');
+
+INSERT INTO tbl_board (board_title, board_content, user_id)
+VALUES ('임시', '임시', '319b1008-c52a-42be-8d68-ec909f7fee5a');
+
+select 
+	tb.user_id,
+	tu.user_auth 
+from tbl_board tb 
+inner join tbl_user tu 
+on tb.user_id = tu.user_id 
+where board_id = 2;
 
 -- 파일
 select * from tbl_file tf ;
-
+delete * from tbl_file ;
 
 -- 유저
 select * from tbl_user tu ;
 delete from tbl_user ;
 
-insert into tbl_user (user_login_id, user_pw, user_name, user_mail, user_tel, user_auth, user_use, user_nickname)
-values ('sj', '3b0cb6318e56ff096de92f7c4a8c682a679946c3f2cfea1fa6e822aaa9eae39c', '수진딸기', 'sujin_78@naver.com', '010-9335-6987', 1, 'y', '딸기');
+insert into tbl_user (user_id, user_login_id, user_pw, user_name, user_mail, user_tel, user_auth, user_use, user_nickname)
+values ('319b1008-c52a-42be-8d68-ec909f7fee5a', 'sj', '3b0cb6318e56ff096de92f7c4a8c682a679946c3f2cfea1fa6e822aaa9eae39c', '수진딸기', 'sujin_78@naver.com', '010-9335-6987', 1, 'y', '딸기');
 
-insert into tbl_user (user_login_id, user_pw, user_name, user_mail, user_tel, user_auth, user_use, user_nickname)
-values ('sj2', '3b0cb6318e56ff096de92f7c4a8c682a679946c3f2cfea1fa6e822aaa9eae39c', '수진바나나', 'sujin_78@naver.com', '010-9335-6987', 0, 'y', '바나나');
+insert into tbl_user (user_id, user_login_id, user_pw, user_name, user_mail, user_tel, user_auth, user_use, user_nickname)
+values ('263d5a3f-82ab-4ff0-817a-77483353983c', 'sj2', '3b0cb6318e56ff096de92f7c4a8c682a679946c3f2cfea1fa6e822aaa9eae39c', '수진바나나', 'sujin_78@naver.com', '010-9335-6987', 0, 'y', '바나나');
+
+
+commit;

@@ -120,6 +120,8 @@ public class BoardController {
 
             bs.boardUpdate(pramObj, files, userId, userAuth);
 
+            System.out.println(param);
+
             return ResponseEntity.ok("게시글 수정완료");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
@@ -152,13 +154,13 @@ public class BoardController {
 
     
     //파일 다운로드
-    @GetMapping("/fileDown/{id}")
+    @GetMapping("/fileDown/{fullName}/{name}")
     @ResponseBody
-    public ResponseEntity<byte[]> fileDown(@PathVariable("id")String id) {
+    public ResponseEntity<byte[]> fileDown(@PathVariable("fullName")String fullName, @PathVariable("name")String name) {
         System.out.println("fileDown 작동");
-        System.out.println(id);
+        System.out.println(fullName + " " + name);
 
-        return bs.fileDown(id);
+        return bs.fileDown(fullName, name);
     }
 
    

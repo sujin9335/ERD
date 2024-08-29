@@ -68,9 +68,8 @@ public class LoginDao {
                                     "where user_login_id = '%s' and user_pw = '%s' "
                                     , id, shaPw);
 
-        System.out.println(sql);
            
-        List<Map<String, Object>> list=jt.queryForList(sql);
+        List<Map<String, Object>> list=jt.queryForList(sql); //리스트를 쓰는이유 map을쓰고 반환이 0개이면 오류가 발생함
         
         if(list.size() == 1) { // 아이디 비번 동일 계정 있음 .. 가입정보 반환
             map=list.get(0);

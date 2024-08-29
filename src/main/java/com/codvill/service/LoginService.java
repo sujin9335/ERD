@@ -23,8 +23,6 @@ public class LoginService {
 
         map=ld.loginCheck(id, shaPw);
 
-        // System.out.println(list);
-
         return map;
     }
 

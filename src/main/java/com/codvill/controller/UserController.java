@@ -36,7 +36,7 @@ public class UserController {
         System.out.println(param);
         try {
             JSONObject obj=new JSONObject();
-            obj=us.list(param);
+            obj=us.userList(param);
             
             return ResponseEntity.ok(obj);
         } catch (Exception e) {

@@ -1,7 +1,12 @@
 #mian {
     height: 500px;
 }
-#modal div {
+#modalGet .border div {
+    border: 1px solid #ccc;
+    border-collapse: collapse;
+    padding: 3px;
+}
+#modalUpsert .border div {
     border: 1px solid #ccc;
     border-collapse: collapse;
     padding: 3px;
@@ -15,10 +20,12 @@
     max-width: 50%;
 }
 
-#contt div {
-    border: none;
-}
+
 
 #flexSwitchCheckDefault {
     margin-left: 20px;
+}
+
+#auth {
+    width: 30%;
 }
