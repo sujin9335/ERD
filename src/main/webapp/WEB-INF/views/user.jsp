@@ -26,7 +26,7 @@
                     <div class="row">
                         <div class="col px-5">
                             <div class="d-flex" role="search">
-                                <select id="searchType">
+                                <select id="searchType" onchange="changeLimitType()">
                                     <option value="user_name">이름</option>
                                     <option value="user_login_id">아이디</option>
                                 </select>
@@ -37,7 +37,7 @@
                                 <div>
                                 </div>
                                 <div class="col-lg-2">
-                                    <select id="limitPage" onchange="changeLimit()">
+                                    <select id="limitPage" onchange="changeLimitType()">
                                         <option value="5">5개씩 보기</option>
                                         <option value="10">10개씩 보기</option>
                                     </select>
@@ -336,9 +336,9 @@
                                 //총 갯수 출력
                                 $("#total").text("총:" + result.total + "개")
                                 //리스트 출력
-                                for (var i = 0; i < result.data.length; i++) {
-                                    var index = i + 1 + param.offset;
-                                    var listUser = "<tr>" +
+                                for (let i = 0; i < result.data.length; i++) {
+                                    const index = i + 1 + param.offset;
+                                    let listUser = "<tr>" +
                                         "<td class='col' data-bs-toggle='modal' data-bs-target='#modalGet' onclick=get(\"" + result.data[i].user_id + "\")>" + index + "</td>" +
                                         "<td class='col' data-bs-toggle='modal' data-bs-target='#modalGet' onclick=get(\"" + result.data[i].user_id + "\")>" + result.data[i].user_name + "</td>" +
                                         "<td class='col' data-bs-toggle='modal' data-bs-target='#modalGet' onclick=get(\"" + result.data[i].user_id + "\")>" + result.data[i].user_login_id + "</td>" +
@@ -354,7 +354,7 @@
                                 }
 
                             } else {
-                                var msg = "<tr>" +
+                                const msg = "<tr>" +
                                     "<td colspan='6' >유저가 존재하지 않습니다</td>" +
                                     "</tr>";
                                 $("#tab tbody").append(msg);
@@ -367,7 +367,112 @@
                         }
                     });
 
+                }
+
+                 //페이지 이동(보고싶은 페이지 ,총페이지)
+                function changePage(number, totalPage) {
+                    if (number == 0 || number < 0) {
+                        alert("첫번째 페이지입니다");
+                        return;
                     }
+
+                    if (number > totalPage) {
+                        alert("마지막 페이지입니다");
+                        return;
+                    }
+                    $("#search").val(searchSelect);
+                    pageCurrent = number;
+                    listUser();
+                }
+
+                // 5, 10개 씩 보기 변경
+                function changeLimitType() {
+                    $("#search").val("");
+                    searchSelect="";
+                    pageCurrent = 1;
+                    listUser();
+                }
+
+                //검색 초기화
+                function resetSearch() {
+                    pageCurrent = 1;
+                    $("#searchType").prop('selectedIndex', 0);
+                    $("#limitPage").prop('selectedIndex', 0);
+                    $("#search").val("");
+                    searchTypeSelect="";
+                    searchSelect="";
+                    listUser();
+                }
+
+                function get(id) {
+
+                    let param = {};
+
+                    param = {
+                        user_id: id
+                    };
+
+                    $.ajax({
+                        url: "/board/get",
+                        type: "POST",
+                        dataType: "json",
+                        contentType: "application/json",
+                        data: JSON.stringify(param),
+                        success: function (result) {
+                            // alert("통신성공");
+                            console.log(result);
+                            // const id = result.data.board_id;
+                            // const title = result.data.board_title;
+                            // const content = result.data.board_content;
+                            // const view = result.data.board_view;
+                            // const userId = result.data.user_id;
+                            // const userNickname = result.data.user_nickname;
+
+                            // $("#modalGet #getId").val(id);
+                            // $("#modalGet #getTitle").text(title);
+                            // $("#modalGet #getView").text(view);
+                            // $("#modalGet #getUserId").val(userId);
+                            // $("#modalGet #getNickname").text(userNickname);
+
+                            // // 읽기전용 토스트 에디터
+                            // editorCreate(true, content, 'Get'); //읽기전용, 내용
+                            
+
+                            // const sessionUserId = "<%= id %>";
+                            // const sessionAuth = "<%= auth %>";
+                            // // console.log(userId + " " +sessionUserId);
+                            // //수정 삭제 관리 .. 관리자는 모두 가능
+                            // if (userId != sessionUserId && sessionAuth != 0) {
+                            //     $("#modalGet .checkUser").hide();
+                            // } else {
+                            //     $("#modalGet .checkUser").show();
+                            // }
+
+                            // //파일 리스트
+                            // $("#modalGet #getFiles").empty(); //초기화
+                            // $.each(result.files, function (index, value) {
+                            //     const file = "<div class='getFile' data-value='" + value.file_id + "." + value.file_extension+ "' style='cursor:pointer; display: flex; align-items: center;'>" + 
+                            //                     "<span onclick=\"location.href='/board/fileDown/" + value.file_id + "." + value.file_extension + "/" + value.file_name +"'\">" + 
+                            //                     value.file_name + "." + value.file_extension + 
+                            //                     "</span>" +
+                            //                     "<button class='deleteFile' style='display: none;'>삭제</button>" +
+                            //             "</div>";
+                            //     $("#modalGet #getFiles").append(file);
+                            // });
+
+                            
+
+                        },
+                        error: function (error) {
+                            alert("서버에러" + error.status + " " + error.responseText);
+                            //모달창 닫기
+                            $("#modalGet").modal('hide');
+                            list();
+                        }
+                    });
+                    }
+
+                
 
 
             </script>

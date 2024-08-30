@@ -32,18 +32,18 @@
                     <div class="row">
                         <div class="col px-5">
                             <div class="d-flex" role="search">
-                                <select id="searchType" onchange="changeSearchType()">
+                                <select id="searchType" onchange="changeLimitType()">
                                     <option value="board_title">제목</option>
                                     <option value="user_nickname">작성자</option>
                                 </select>
                                 <input class="form-control" type="search" placeholder="검색" aria-label="Search"
                                     id="search">
-                                <button class="btn btn-outline-success col-1" onclick="listBoard(true);">검색</button>
+                                <button class="btn btn-outline-success col-1" onclick="list(true);">검색</button>
                                 <button class="btn btn-outline-success col-1" onclick="resetSearch()">초기화</button>
                                 <div>
                                 </div>
                                 <div class="col-lg-2">
-                                    <select id="limitPage" onchange="changeLimit()">
+                                    <select id="limitPage" onchange="changeLimitType()">
                                         <option value="5">5개씩 보기</option>
                                         <option value="10">10개씩 보기</option>
                                     </select>
@@ -251,10 +251,10 @@
 
             // 리스트 요청
             window.onload = function () {
-                listBoard();
+                list();
             }
 
-            function listBoard(search) {
+            function list(search) {
 
                 //테이블 초기화
                 $("#tab tbody").empty();
@@ -299,14 +299,14 @@
                             //리스트 출력
                             for (let i = 0; i < result.data.length; i++) {
                                 const index = i + 1 + param.offset;
-                                const listBoard = "<tr>" +
+                                const list = "<tr>" +
                                     "<td class='col' data-bs-toggle='modal' data-bs-target='#modalGet' onclick='get(\"" + result.data[i].board_id + "\")'>" + index + "</td>" +
                                     "<td class='col' data-bs-toggle='modal' data-bs-target='#modalGet' onclick='get(\"" + result.data[i].board_id + "\")'>" + escapeHtml(result.data[i].board_title) + "</td>" +
                                     "<td class='col' data-bs-toggle='modal' data-bs-target='#modalGet' onclick='get(\"" + result.data[i].board_id + "\")'>" + result.data[i].user_nickname + "</td>" +
                                     "<td class='col' data-bs-toggle='modal' data-bs-target='#modalGet' onclick='get(\"" + result.data[i].board_id + "\")'>" + result.data[i].board_view + "</td>" +
                                     "<td class='col' data-bs-toggle='modal' data-bs-target='#modalGet' onclick='get(\"" + result.data[i].board_id + "\")'>" + result.data[i].board_date + "</td>" +
                                     "</tr>";
-                                $("#tab tbody").append(listBoard);
+                                $("#tab tbody").append(list);
                             }
 
                         } else {
@@ -338,23 +338,15 @@
                 }
                 $("#search").val(searchSelect);
                 pageCurrent = number;
-                listBoard();
+                list();
             }
 
-            // 5, 10개 씩 보기 변경
-            function changeLimit() {
+            // 5, 10개 씩 보기 변경 // 타입 변경
+            function changeLimitType() {
                 $("#search").val("");
                 searchSelect="";
                 pageCurrent = 1;
-                listBoard();
-            }
-
-            // 검색타입변경
-            function changeSearchType() {
-                $("#search").val("");
-                searchSelect="";
-                pageCurrent = 1;
-                listBoard();
+                list();
             }
 
             //검색 초기화
@@ -365,7 +357,7 @@
                 $("#search").val("");
                 searchTypeSelect="";
                 searchSelect="";
-                listBoard();
+                list();
             }
 
             //상세
@@ -425,14 +417,14 @@
                             $("#modalGet #getFiles").append(file);
                         });
 
-                        listBoard();
+                        list();
 
                     },
                     error: function (error) {
                         alert("서버에러" + error.status + " " + error.responseText);
                         //모달창 닫기
                         $("#modalGet").modal('hide');
-                        listBoard();
+                        list();
                     }
                 });
             }
@@ -619,7 +611,7 @@
                         //     alert(result.msg);
                         // }
                         $("#modalUpsert").modal('hide');
-                        listBoard();
+                        list();
                         
                        
                     },
@@ -627,7 +619,7 @@
                         alert("서버에러" + error.status + " " + error.responseText);
                         //모든 모달창 닫기
                         $("#modalUpsert").modal('hide');
-                        listBoard();
+                        list();
                     }
                 });
 
@@ -667,14 +659,14 @@
                     success: function (result) {
                         console.log(result);
                         $("#modalGet").modal('hide');
-                        listBoard();
+                        list();
 
                     },
                     error: function (error) {
                         alert("서버에러" + error.status + " " + error.responseText);
                         //모든 모달창 닫기
                         $("#modalGet").modal('hide');
-                        listBoard();
+                        list();
                     }
                 });
             }
