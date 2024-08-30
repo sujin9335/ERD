@@ -15,8 +15,8 @@ public class LoginInterceptor implements HandlerInterceptor{
         System.out.println("로그인인터셉터 실행");
         if(request.getSession() == null){
             System.out.println("세션 없음");
-            response.sendRedirect(request.getContextPath() + "/login");
-			// request.getRequestDispatcher("/login").forward(request, response);
+            response.sendRedirect(request.getContextPath() + "/login"); //URL 변경시에 사용
+			// request.getRequestDispatcher("/login").forward(request, response); //URL 변경없이 사용
 			return false;
 		} else if(request.getSession().getAttribute("userInfo")  == null){
             System.out.println("유저정보 없음");

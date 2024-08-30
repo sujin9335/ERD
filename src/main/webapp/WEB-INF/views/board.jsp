@@ -240,13 +240,13 @@
             //현재 페이지
             let pageCurrent = 1;
             //검색 저장
-            let searchSelect = ""; //검색어
+            let searchSelect = ""; //검색어 (페이지 이동시에 고정된 검색어를 가져와야됨)
 
             //토스트 에디터 (등록, 수정시 내용을 가져올수있음)
             let textEditor = "";
-            //파일arr
-            let fileArr = [];
-            //삭제할파일 arr
+            //파일arr (게시글 등록시 input태그의 선택된 파일을 여기에 넣고 upert() 요청시에 보낸다)
+            let fileArr = []; 
+            //삭제할파일 arr (modalChange() 에서 수정 모달에서 기존에 있던 파일을 삭제할경우 여기에 넣고 upert() 요청시에 보낸다) 
             let deletedFileIdArr = [];
 
             // 리스트 요청
@@ -261,7 +261,7 @@
                 //페이징 초기화
                 $("#paging").empty();
 
-                var param = {};
+                let param = {};
 
                 //검색으로 리스트 불렀는지 확인
                 if(search) {
@@ -270,7 +270,7 @@
                 }
 
                 //몇개씩 볼건지 선택
-                var limitPage = $("#limitPage").val();
+                const limitPage = $("#limitPage").val();
 
                 param = {
                     offset: limitPage * (pageCurrent - 1), //현재 보고있는 페이지
@@ -291,15 +291,15 @@
                             // alert("통신성공");
                             console.log(result);
 
-                            var totalPage = Math.ceil(result.total / limitPage); //보여지는 총페이지
+                            const totalPage = Math.ceil(result.total / limitPage); //보여지는 총페이지
                             paging(pageCurrent, totalPage); //페이징 함수
 
                             //총 갯수 출력
                             $("#total").text("총:" + result.total + "개")
                             //리스트 출력
-                            for (var i = 0; i < result.data.length; i++) {
-                                var index = i + 1 + param.offset;
-                                var listBoard = "<tr>" +
+                            for (let i = 0; i < result.data.length; i++) {
+                                const index = i + 1 + param.offset;
+                                const listBoard = "<tr>" +
                                     "<td class='col' data-bs-toggle='modal' data-bs-target='#modalGet' onclick='get(\"" + result.data[i].board_id + "\")'>" + index + "</td>" +
                                     "<td class='col' data-bs-toggle='modal' data-bs-target='#modalGet' onclick='get(\"" + result.data[i].board_id + "\")'>" + escapeHtml(result.data[i].board_title) + "</td>" +
                                     "<td class='col' data-bs-toggle='modal' data-bs-target='#modalGet' onclick='get(\"" + result.data[i].board_id + "\")'>" + result.data[i].user_nickname + "</td>" +
@@ -310,7 +310,7 @@
                             }
 
                         } else {
-                            var msg = "<tr>" +
+                            const msg = "<tr>" +
                                 "<td colspan='6' >게시글이 존재하지 않습니다</td>" +
                                 "</tr>";
                             $("#tab tbody").append(msg);
@@ -371,7 +371,7 @@
             //상세
             function get(id) {
 
-                var param = {};
+                let param = {};
 
                 param = {
                     board_id: id
@@ -386,12 +386,12 @@
                     success: function (result) {
                         // alert("통신성공");
                         console.log(result);
-                        var id = result.data.board_id;
-                        var title = result.data.board_title;
-                        var content = result.data.board_content;
-                        var view = result.data.board_view;
-                        var userId = result.data.user_id;
-                        var userNickname = result.data.user_nickname;
+                        const id = result.data.board_id;
+                        const title = result.data.board_title;
+                        const content = result.data.board_content;
+                        const view = result.data.board_view;
+                        const userId = result.data.user_id;
+                        const userNickname = result.data.user_nickname;
 
                         $("#modalGet #getId").val(id);
                         $("#modalGet #getTitle").text(title);
@@ -403,8 +403,8 @@
                         editorCreate(true, content, 'Get'); //읽기전용, 내용
                         
 
-                        var sessionUserId = "<%= id %>";
-                        var sessionAuth = "<%= auth %>";
+                        const sessionUserId = "<%= id %>";
+                        const sessionAuth = "<%= auth %>";
                         // console.log(userId + " " +sessionUserId);
                         //수정 삭제 관리 .. 관리자는 모두 가능
                         if (userId != sessionUserId && sessionAuth != 0) {
@@ -416,7 +416,7 @@
                         //파일 리스트
                         $("#modalGet #getFiles").empty(); //초기화
                         $.each(result.files, function (index, value) {
-                            var file = "<div class='getFile' data-value='" + value.file_id + "." + value.file_extension+ "' style='cursor:pointer; display: flex; align-items: center;'>" + 
+                            const file = "<div class='getFile' data-value='" + value.file_id + "." + value.file_extension+ "' style='cursor:pointer; display: flex; align-items: center;'>" + 
                                             "<span onclick=\"location.href='/board/fileDown/" + value.file_id + "." + value.file_extension + "/" + value.file_name +"'\">" + 
                                             value.file_name + "." + value.file_extension + 
                                             "</span>" +
@@ -425,23 +425,14 @@
                             $("#modalGet #getFiles").append(file);
                         });
 
-                        
-                        //파일 삭제
-                        deletedFileIdArr = []; //초기화
-                        $(document).off('click', '.deleteFile').on('click', '.deleteFile', function() {
-                            $(this).closest('div').remove();
-                            let fileId = $(this).closest('div').data('value');
-                            deletedFileIdArr.push(fileId);
-                            console.log(deletedFileIdArr);
-
-                        });
-
                         listBoard();
-
 
                     },
                     error: function (error) {
                         alert("서버에러" + error.status + " " + error.responseText);
+                        //모달창 닫기
+                        $("#modalGet").modal('hide');
+                        listBoard();
                     }
                 });
             }
@@ -449,7 +440,7 @@
 
             //텍스트 에디터 생성(토스트에디터)
             function editorCreate(isViewer, contentText, seletor) {
-                var selectId = "#modal" + seletor; //들어갈곳 Id
+                const selectId = "#modal" + seletor; //들어갈곳 Id
                 $(selectId +' .editorDiv').empty(); //초기화
                 textEditor = new toastui.Editor.factory({
                     el: document.querySelector(selectId +' .editorDiv'), // 에디터를 적용할 요소 (컨테이너)
@@ -473,10 +464,20 @@
                 $("#modalUpsert #fileList").empty();
                 fileArr = [];
 
-                // 이벤트 제거
-                $('#fileInput').off('change', fileInputEvent);
-                // 이벤트 등록
-                $('#fileInput').on('change', fileInputEvent);
+
+                //파일 선택 버튼 이벤트
+                $('#fileInput').off('change').on('change', function() {
+                    const files = $(this)[0].files;
+
+                    //초기화
+                    $('#fileList').empty();
+                    //파일 배열에 추가
+                    $.each(files, function(index, file) {
+                        fileArr.push(file);
+                    });
+                    //파일 배열 출력
+                    fileArrPrint();
+                });
 
 
                 if(type == "insert") {
@@ -485,34 +486,30 @@
                     editorCreate(false, "", "Upsert");
                 } else if(type == "update") {
                     //업데이트
+
+                    //기존 파일 삭제 이벤트
+                    deletedFileIdArr = []; //초기화
+                    $(document).off('click', '.deleteFile').on('click', '.deleteFile', function() {
+                        $(this).closest('div').remove();
+                        let fileId = $(this).closest('div').data('value');
+                        deletedFileIdArr.push(fileId);
+                        console.log(deletedFileIdArr);
+                    });
+
                     $("#modalUpsert .fileList").show();
 
                     $("#modalUpsert #id").val($("#modalGet #getId").val());
                     $("#modalUpsert #title input").val($("#modalGet #getTitle").text());
                     $("#modalUpsert #uploadFileList").html($("#modalGet #getFiles").html());
                     $(".getFile button").show();
-                    var content=$("#modalGet .toastui-editor-contents").html();
-                    console.log(content);
+                    const content=$("#modalGet .toastui-editor-contents").html();
+                    // console.log(content);
                     editorCreate(false, content, "Upsert");
 
                 }
 
             }
 
-            //파일 입력 이벤트 
-            function fileInputEvent() {
-                var files = $(this)[0].files;
-                
-                $('#fileList').empty();
-                
-                $.each(files, function(index, file) {
-                    fileArr.push(file);
-                });
-
-                fileArrPrint();
-            }
-
-            
 
             //파일버튼 클릭
             function fileBtnSelect() {
@@ -524,11 +521,11 @@
             function fileArrPrint() {
                 $('#fileList').empty();
                 $.each(fileArr, function(index, file) {
-                    var fileNameSize = file.name + ' (' + (file.size / 1024).toFixed(2) + ' KB)';
-                    var fileDiv = $('<div></div>').text(fileNameSize);
+                    const fileNameSize = file.name + ' (' + (file.size / 1024).toFixed(2) + ' KB)';
+                    const fileDiv = $('<div></div>').text(fileNameSize);
                     
                     // 삭제 버튼 추가
-                    var deleteButton = $('<button></button>').text('삭제').on('click', function() {
+                    const deleteButton = $('<button></button>').text('삭제').on('click', function() {
                         // 해당 파일을 배열에서 삭제
                         fileArr.splice(index, 1);
                         // 목록을 다시 출력
@@ -543,21 +540,21 @@
 
             //인서트, 업데이트
             function upsert() {
-                var sessionUserId = "<%= id %>";
-                var url = "";//ajax통신 url
+                const sessionUserId = "<%= id %>";
+                let url = "";//ajax통신 url
 
-                var formData = new FormData(); //파일 전송시 필요
-                var param = {};
+                const formData = new FormData(); //파일 전송시 필요
+                let param = {};
 
                 //내용추출
-                var boardId = $("#modalUpsert #id").val();
-                var title = $("#modalUpsert #title input").val().trim();
-                var content = textEditor.getMarkdown();
-                console.log(content);
+                const boardId = $("#modalUpsert #id").val();
+                const title = $("#modalUpsert #title input").val().trim();
+                const content = textEditor.getMarkdown();
+                // console.log(content);
 
                 //파일 추출
-                var maxSizeBytes = 3 * 1024 * 1024;//파일 최대 사이즈
-                for (var i = 0; i < fileArr.length; i++) {
+                const maxSizeBytes = 3 * 1024 * 1024;//파일 최대 사이즈
+                for (let i = 0; i < fileArr.length; i++) {
                     if (fileArr[i].size > maxSizeBytes) {
                         alert("파일 사이즈가 3MB를 초과하는 파일이 포함되어 있습니다.");
                         return; // upsert 함수 전체를 종료
@@ -567,7 +564,7 @@
                     
 
                 //유효성 검사
-                var bool = confirm("작성 하시겠습니까?");
+                const bool = confirm("작성 하시겠습니까?");
                 if (!bool) {
                     return;
                 }
@@ -582,9 +579,9 @@
                     return;
                 }
 
-                //2000바이트 이하 검사
-                var encoder = new TextEncoder();
-                var encoded = encoder.encode(content);
+                //800바이트 이하 검사
+                const encoder = new TextEncoder();
+                const encoded = encoder.encode(content);
                 console.log(encoded.length);
                 if (encoded.length > 800) {
                     alert("내용은 800바이트 이하입니다");
@@ -603,10 +600,6 @@
                     param.board_id = boardId;
                     param.file_id = deletedFileIdArr;
                     
-                    // $('#uploadFileList div').each(function (index) {
-                    //     var value = $(this).attr('data-value');
-                    //     param.file_id.push(value);
-                    // });
                 } else {
                     url = "/board/insert"
                 }
@@ -632,6 +625,9 @@
                     },
                     error: function (error) {
                         alert("서버에러" + error.status + " " + error.responseText);
+                        //모든 모달창 닫기
+                        $("#modalUpsert").modal('hide');
+                        listBoard();
                     }
                 });
 
@@ -639,22 +635,22 @@
 
             //게시글 삭제
             function del() {
-                var bool = confirm("삭제 하시겠습니까?");
+                const bool = confirm("삭제 하시겠습니까?");
 
                 if (!bool) {
                     return;
                 }
-                var param = {};
+                let param = {};
                 //삭제할 파일데이터 추가
                 // 모든 .getFile 요소를 선택
-                var getFileElements = $('.getFile');
+                const getFileElements = $('.getFile');
 
                 // data-value 속성을 배열로 저장
-                var dataValues = getFileElements.map(function() {
+                const dataValues = getFileElements.map(function() {
                     return $(this).data('value');
                 }).get();
 
-                console.log(dataValues);
+                // console.log(dataValues);
                 
 
                 param = {
@@ -676,6 +672,9 @@
                     },
                     error: function (error) {
                         alert("서버에러" + error.status + " " + error.responseText);
+                        //모든 모달창 닫기
+                        $("#modalGet").modal('hide');
+                        listBoard();
                     }
                 });
             }

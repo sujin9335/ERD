@@ -170,10 +170,13 @@ public class BoardService {
                 Files.write(filePath, file.getBytes());
 
                 try {
-                    // DB 저장
+                    // DB저장
                     bD.fileInsert(realFileName, uuid+"", fileExtension, uploadPath, boardId);
                     
                 } catch (Exception e) {
+                    //DB저장 실패시 방금 저장한 파일 삭제
+                    fileDel(fileSaveName);
+
                     System.err.println("파일 저장 DB에러: " + e.getMessage());
                     throw new Exception("파일 저장 DB에러" , e);
                 }
@@ -192,7 +195,7 @@ public class BoardService {
         //게시글 파일 유효성 검사
         boardCheck(param, files);
 
-        //세션 유저 확인
+        //세션 관리자, 유저 확인
         String userId=bD.boardGetUserId(param);
         if(!sessionAuth.equals("0")) {
             if (!userId.equals(sessionUserId)) {
@@ -250,15 +253,36 @@ public class BoardService {
 
     }
 
+    // public void file
+
+
     public void boardDel(Map<String, Object> param, String sessionUserId, String sessionAuth) throws Exception {
 
-        //세션 유저 확인
+        //세션 관리자, 유저 확인
         String userId=bD.boardGetUserId(param);
         if(!sessionAuth.equals("0")) {
             if (!userId.equals(sessionUserId)) {
                 throw new Exception("유저 불일치");
             }
-            
+        }
+
+        //파일 삭제
+        List<String> files=(List<String>) param.get("files");
+        if(files.size() > 0) {
+            for (String file : files) {
+                try {
+                    bD.delFile(file); //DB에서 파일삭제
+                } catch (Exception e) {
+                    System.err.println("삭제 file del DB에러: " + e.getMessage());
+                    throw new Exception("삭제 file del DB에러" , e); //파일 db삭제 멈추게됨
+                }
+                try {
+                    fileDel(file);
+                } catch (Exception e) {
+                    System.err.println("삭제 file del 에러: " + e.getMessage());
+                    throw new Exception("삭제 file del 에러" , e);
+                }
+            }
         }
 
         try {
@@ -270,14 +294,6 @@ public class BoardService {
             throw new Exception("board 삭제 DB에러" , e);
         }
         
-        List<String> files=(List<String>) param.get("files");
-        for (String file : files) {
-            try {
-                fileDel(file);
-            } catch (Exception e) {
-                System.err.println("삭제 file del 에러: " + e.getMessage());
-            }
-        }
 
 
     }
@@ -311,7 +327,7 @@ public class BoardService {
         System.out.println(fullSaveName);
         System.out.println(name);
 
-        // 파일이 저장된 경로
+        // 파일이 저장된 경로 + \
         String savename = uploadPath+"\\"+fullSaveName;
         // String savename = "C:\\upload\\파일2^!78.txt";
         File file = new File(savename);
