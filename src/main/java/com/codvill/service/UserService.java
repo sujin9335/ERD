@@ -66,11 +66,15 @@ public class UserService {
         return obj;
     }
 
-    public Object idCheck(Map<String, Object> param) {
+    public JSONObject checkDuplicate(Map<String, Object> param) {
         JSONObject obj=new JSONObject();
 
-        obj=(JSONObject) ud.idCheck(param);
-
+        try {
+            obj=ud.checkDuplicate(param);
+        } catch (Exception e) {
+            System.err.println("idCheck DB에러: " + e.getMessage());
+            throw new RuntimeException("idCheck DB에러", e);
+        }
 
         return obj;
     }

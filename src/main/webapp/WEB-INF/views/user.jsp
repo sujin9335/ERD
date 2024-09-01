@@ -173,8 +173,8 @@
                                         <input class="form-check-input ms-4" type="checkbox" role="switch" onchange="userSwitch()">
                                     </div>
                                     <div class="col-1 pt-2 btnDel">
-                                        <button type="button" class="btn btn-info edit"
-                                            onclick="editUpdate()">수정</button>
+                                        <button type="button" class="btn btn-info edit" data-bs-toggle="modal"
+                                        data-bs-target="#modalUpsert" onclick="modalChange('update')">수정</button>
                                     </div>
                                     <div id="chBtn" class="col-1 pt-2 btnDel">
                                         <button type="button" class="btn btn-warning"
@@ -200,9 +200,9 @@
                                     <div class="col-2 pt-3">
                                         <h3>아이디</h3>
                                     </div>
-                                    <div class="col-8 text-start px-4 pt-3" id="login_id">
+                                    <div class="col-8 text-start px-4 pt-3" id="loginId">
                                         <input class='w-30' type='text'>
-                                        <button class="btn btn-danger" id="idCheck" onclick="checkDuplicate('id');">중복체크</button>
+                                        <button class="btn btn-danger checkBtn" id="idCheck" >중복체크</button>
                                     </div>
 
                                     <div class="col-1">
@@ -238,7 +238,7 @@
                                     </div>
                                     <div class="col-10 text-start p-4 " id="nickname">
                                         <input class='w-70' type='text'>
-                                        <button class="btn btn-danger" id="nicknameCheck" onclick="checkDuplicate('nickname');">중복체크</button>
+                                        <button class="btn btn-danger checkBtn" id="nicknameCheck" >중복체크</button>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -449,14 +449,15 @@
 
                 //계정 잠금 스위치
                 function userSwitch() {
-                    const id = $("#modalGet #getId").val();
 
                     let param = {};
 
                     param = {
-                        user_id: id,
+                        user_id: $("#modalGet #getId").val(),
                         value: $("#modalGet #use input").prop("checked") ? 0 : 1
                     }
+
+                    console.log(param);
 
                     $.ajax({
                         url: "/user/useChange",
@@ -467,11 +468,6 @@
                         success: function (result) {
                             // alert("통신성공");
                             console.log(result);
-                            // if(result.resultUser != 1 ) {
-                            //     alert("유저 DB 에러")
-                            // }
-
-
 
                         },
                         error: function (error) {
@@ -479,45 +475,99 @@
                         }
                     });
 
+                }
 
-                    $("input[type='checkbox']").on("change", function () {
-                        var id = $(this).attr("data-value");
-                        var value = 0;
+                //모달 등록, 수정 양식변경
+                function modalChange(type) {
+                    //초기화
+                    $("#modalUpsert #loginId input").val("");
+                    $("#modalUpsert #pw input").val("");
+                    $("#modalUpsert #name input").val("");
+                    $("#modalUpsert #nickname input").val("");
+                    $("#modalUpsert #tel input").val("");
+                    $("#modalUpsert #mail input").val("");
+                    $("#modalUpsert #auth").prop('selectedIndex', 0);
 
-                        if ($(this).prop("checked")) {
-                            value = 1; //체크
-                        } else {
-                            value = 0; //언체크
-                        }
+                    if(type == 'update') {
+                        $("#modalUpsert #id").val($("#modalGet #getId").val());
+                        $("#modalUpsert #loginId input").val($("#modalGet #getLoginId").text());
+                        $("#modalUpsert #name input").val($("#modalGet #getName").text());
+                        $("#modalUpsert #nickname input").val($("#modalGet #getNickname").text());
+                        $("#modalUpsert #tel input").val($("#modalGet #getTel").text());
+                        $("#modalUpsert #mail input").val($("#modalGet #getMail").text());
+                        $("#modalUpsert #auth").val($("#modalGet #getAuth").text() == '관리자' ? 0 : 1);
+                    }
 
-                        var param = {
-                            user_id: id,
-                            value: value
-                        }
-                        console.log(param);
-
-
-                        $.ajax({
-                            url: "/user/useChange",
-                            type: "POST",
-                            dataType: "json",
-                            contentType: "application/json",
-                            data: JSON.stringify(param),
-                            success: function (result) {
-                                // alert("통신성공");
-                                console.log(result);
-                                if(result.resultUser != 1 ) {
-                                    alert("유저 DB 에러")
-                                }
-
-
-
-                            },
-                            error: function () {
-                                alert("통신에러");
-                            }
-                        });
+                    $(".checkBtn").click(function() {
+                        checkDuplicate($(this));
                     });
+
+
+
+
+                }
+
+
+                //등록, 수정
+                function upsert() {
+                    
+                }
+
+                //아이디 중복체크
+                function checkDuplicate(btn) {
+                    let param = {};
+
+                    const selectDiv = btn.closest("div"); //버튼이 속한 div
+
+                    const inputValue = selectDiv.find("input").val(); //input값
+
+                    const id = selectDiv.attr("id");//버튼이 속한 div의 id값
+
+                    console.log(inputValue);
+                    console.log(id);
+
+                    // const loginId = $("#modalUpsert #loginId input").val();
+
+
+                    if(inputValue == "") {
+                        alert("중복체크 내용을 입력해주세요");
+                        return;
+                    }
+
+                    param = {
+                        type: id == "loginId" ? "user_login_id" : "user_nickname",
+                        value: inputValue
+                    }
+                    
+
+                    $.ajax({
+                        url: "/user/checkDuplicate",
+                        type: "POST",
+                        dataType: "json",
+                        contentType: "application/json",
+                        data: JSON.stringify(param),
+                        success: function (result) {
+                            // alert("통신성공");
+                            console.log(result);
+                            if(result.cnt == 0) {
+                                //체크완료 처리
+                                selectDiv.find("button").text("체크해제").removeClass().addClass("btn btn-success").attr("onclick", "clearCheckDuplicate();");
+                                selectDiv.find("input").prop("disabled", true);
+                            } else {
+                                alert("중복된 아이디입니다");
+                            }
+                        },
+                        error: function (error) {
+                            alert("서버에러" + error.status + " " + error.responseText);
+                        }
+                    });
+
+                }
+
+                //체크해제
+                function clearCheckDuplicate() {
+                    $("#idCheck").text("중복체크").removeClass().addClass("btn btn-danger").attr("onclick", "checkDuplicate('id');");
+                    $("#loginId input").prop("disabled", false);
                 }
 
 

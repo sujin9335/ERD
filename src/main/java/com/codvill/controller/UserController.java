@@ -89,15 +89,21 @@ public class UserController {
 
     }
 
-    @PostMapping("/idCheck")
+    @PostMapping("/checkDuplicate")
     @ResponseBody
-    public Object idCheck(@RequestBody Map<String, Object> param) {
-        System.out.println("ID체크 실행");
-        JSONObject obj=new JSONObject();
+    public ResponseEntity<Object> checkDuplicate(@RequestBody Map<String, Object> param) {
+        System.out.println("중복체크 실행");
         System.out.println(param);
-        obj=(JSONObject) us.idCheck(param);
 
-        return obj;
+        try {
+            JSONObject obj=new JSONObject();
+            obj=us.checkDuplicate(param);
+            return ResponseEntity.ok(obj);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+
+
 
     }
 

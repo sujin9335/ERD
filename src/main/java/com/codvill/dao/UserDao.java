@@ -152,20 +152,18 @@ public class UserDao {
 		return value;
 	}
 
-	public Object idCheck(Map<String, Object> param) {
+	public JSONObject checkDuplicate(Map<String, Object> param) {
 		JSONObject result = new JSONObject();
-		String id = (String) param.get("user_login_id");
+		String type = param.get("type").toString();
+		String value = param.get("value").toString();
 
 		String sql = String.format("SELECT " +
 				"user_login_id " +
 				"FROM " +
 				"tbl_user " +
-				"where user_login_id = '%s'", id);
+				"where %s = '%s'", type, value);
 
 		List<Map<String, Object>> list = jt.queryForList(sql);
-		// System.out.println();
-		// System.out.println(list.size());
-		// System.out.println();
 
 		result.put("cnt", list.size());
 
@@ -211,20 +209,20 @@ public class UserDao {
 	public void useChange(Map<String, Object> param) {
 		String id = (String) param.get("user_id");
 		int value = (Integer) param.get("value");
-		String use = value == 1 ? "n" : "y";
+		String use = value == 0 ? "n" : "y";
 
 
 		String sql = String.format("UPDATE tbl_user " +
 				"SET user_use = '%s' " +
-				"WHERE user_id = %s", use, id);
+				"WHERE user_id = '%s'", use, id);
 		jt.update(sql);
-		// System.out.println(sql);
+		System.out.println(sql);
 
 		// 로그인 잠금횟수 0으로 초기화
 		if (use.equals("y")) {
 			sql = String.format("update tbl_user " +
 					"set user_lock_cnt = 0 " +
-					"where user_id = %s", id);
+					"where user_id = '%s'", id);
 			jt.update(sql);
 		}
 
