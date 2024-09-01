@@ -96,10 +96,11 @@ public class UserDao {
 		return result;
 	}
 
-	public Object get(Map<String, Object> param) {
+	public JSONObject get(Map<String, Object> param) {
 		JSONObject result = new JSONObject();
-		int id = (Integer) param.get("user_id");
-		String sql = String.format("select * from tbl_user where user_id=%d", id);
+		System.out.println(param);
+		String id = param.get("user_id").toString();
+		String sql = String.format("select * from tbl_user where user_id='%s'", id);
 
 		Map<String, Object> map = jt.queryForMap(sql);
 		result.put("data", map);
@@ -207,34 +208,26 @@ public class UserDao {
 		return value;
 	}
 
-	public int useChange(Map<String, Object> param) {
-		int status = -1;
+	public void useChange(Map<String, Object> param) {
 		String id = (String) param.get("user_id");
 		int value = (Integer) param.get("value");
-		String temp = "n";
+		String use = value == 1 ? "n" : "y";
 
-		if (value == 1) {
-			temp = "n";
-		} else {
-			temp = "y";
-		}
 
 		String sql = String.format("UPDATE tbl_user " +
 				"SET user_use = '%s' " +
-				"WHERE user_id = %s", temp, id);
-		status = jt.update(sql);
+				"WHERE user_id = %s", use, id);
+		jt.update(sql);
 		// System.out.println(sql);
 
-		// cnt 0으로 초기화
-		if (temp.equals("y")) {
+		// 로그인 잠금횟수 0으로 초기화
+		if (use.equals("y")) {
 			sql = String.format("update tbl_user " +
 					"set user_lock_cnt = 0 " +
 					"where user_id = %s", id);
 			jt.update(sql);
 		}
 
-
-		return status;
 	}
 
 }

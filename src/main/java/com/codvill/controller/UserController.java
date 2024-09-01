@@ -49,13 +49,19 @@ public class UserController {
 
     @PostMapping("/get")
     @ResponseBody
-    public Object get(@RequestBody Map<String, Object> param) {
+    public ResponseEntity<Object> get(@RequestBody Map<String, Object> param) {
         System.out.println("GET 실행");
-        JSONObject obj=new JSONObject();
         System.out.println(param);
-        obj=(JSONObject) us.get(param);
 
-        return obj;
+        try {
+            JSONObject obj=new JSONObject();
+            obj=us.userGet(param);
+            
+            return ResponseEntity.ok(obj);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+
 
     }
 
@@ -110,14 +116,18 @@ public class UserController {
 
     @PostMapping("/useChange")
     @ResponseBody
-    public Object useChange(@RequestBody Map<String, Object> param) {
+    public ResponseEntity<Object> useChange(@RequestBody Map<String, Object> param) {
         System.out.println("useChange 실행");
-        JSONObject obj=new JSONObject();
         System.out.println(param);
-        
-        obj=(JSONObject) us.useChange(param);
 
-        return obj;
+        try {
+            JSONObject obj=new JSONObject();
+            us.useChange(param);
+            return ResponseEntity.ok(obj);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+
 
     }
 

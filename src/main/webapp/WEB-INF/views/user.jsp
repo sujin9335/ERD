@@ -53,7 +53,7 @@
                                         <th class="col-3" scope="col">이름</th>
                                         <th class="col-3" scope="col">ID</th>
                                         <th class="col-3" scope="col">닉네임</th>
-                                        <th class="col-2" scope="col">잠금해제</th>
+                                        <th class="col-2" scope="col">권한</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -170,8 +170,7 @@
                                         <h3>잠금해제</h3>
                                     </div>
                                     <div class="col-3 text-start p-4 form-switch del" id="use">
-                                        <input class="form-check-input ms-4" type="checkbox" role="switch"
-                                            id="flexSwitchCheckDefault">
+                                        <input class="form-check-input ms-4" type="checkbox" role="switch" onchange="userSwitch()">
                                     </div>
                                     <div class="col-1 pt-2 btnDel">
                                         <button type="button" class="btn btn-info edit"
@@ -342,12 +341,11 @@
                                         "<td class='col' data-bs-toggle='modal' data-bs-target='#modalGet' onclick=get(\"" + result.data[i].user_id + "\")>" + index + "</td>" +
                                         "<td class='col' data-bs-toggle='modal' data-bs-target='#modalGet' onclick=get(\"" + result.data[i].user_id + "\")>" + result.data[i].user_name + "</td>" +
                                         "<td class='col' data-bs-toggle='modal' data-bs-target='#modalGet' onclick=get(\"" + result.data[i].user_id + "\")>" + result.data[i].user_login_id + "</td>" +
-                                        "<td class='col' data-bs-toggle='modal' data-bs-target='#modalGet' onclick=get(\"" + result.data[i].user_id + "\")>" + result.data[i].user_nickname + "</td>";
-                                    if (result.data[i].user_use == 'y') {
-                                        listUser += "<td class='col-2 form-switch' scope='row'><input data-value=" + result.data[i].user_id + " class='form-check-input' type='checkbox' role='switch' id='flexSwitchCheckDefault' ></td>" +
-                                            "</tr>";
+                                        "<td class='col' data-bs-toggle='modal' data-bs-target='#modalGet' onclick=get(\"" + result.data[i].user_id + "\")>" + result.data[i].user_nickname + "</td>" ;
+                                    if (result.data[i].user_auth == 0 ) {
+                                        listUser += "<td class='col' data-bs-toggle='modal' data-bs-target='#modalGet' onclick=get(\"" + result.data[i].user_id + "\")>관리자</td>";
                                     } else {
-                                        listUser += "<td class='col-2 form-switch' scope='row'><input data-value=" + result.data[i].user_id + " class='form-check-input' type='checkbox' role='switch' id='flexSwitchCheckDefault' checked></td>" +
+                                        listUser += "<td class='col' data-bs-toggle='modal' data-bs-target='#modalGet' onclick=get(\"" + result.data[i].user_id + "\")>일반유저</td>";
                                             "</tr>";
                                     }
                                     $("#tab tbody").append(listUser);
@@ -413,7 +411,7 @@
                     };
 
                     $.ajax({
-                        url: "/board/get",
+                        url: "/user/get",
                         type: "POST",
                         dataType: "json",
                         contentType: "application/json",
@@ -421,46 +419,23 @@
                         success: function (result) {
                             // alert("통신성공");
                             console.log(result);
-                            // const id = result.data.board_id;
-                            // const title = result.data.board_title;
-                            // const content = result.data.board_content;
-                            // const view = result.data.board_view;
-                            // const userId = result.data.user_id;
-                            // const userNickname = result.data.user_nickname;
+                            const id = result.data.user_id;
+                            const loginId= result.data.user_login_id;
+                            const name = result.data.user_name;
+                            const nickname = result.data.user_nickname;
+                            const mail = result.data.user_mail;
+                            const tel = result.data.user_tel;
+                            const auth = result.data.user_auth; 
+                            const use = result.data.user_use;
 
-                            // $("#modalGet #getId").val(id);
-                            // $("#modalGet #getTitle").text(title);
-                            // $("#modalGet #getView").text(view);
-                            // $("#modalGet #getUserId").val(userId);
-                            // $("#modalGet #getNickname").text(userNickname);
-
-                            // // 읽기전용 토스트 에디터
-                            // editorCreate(true, content, 'Get'); //읽기전용, 내용
-                            
-
-                            // const sessionUserId = "<%= id %>";
-                            // const sessionAuth = "<%= auth %>";
-                            // // console.log(userId + " " +sessionUserId);
-                            // //수정 삭제 관리 .. 관리자는 모두 가능
-                            // if (userId != sessionUserId && sessionAuth != 0) {
-                            //     $("#modalGet .checkUser").hide();
-                            // } else {
-                            //     $("#modalGet .checkUser").show();
-                            // }
-
-                            // //파일 리스트
-                            // $("#modalGet #getFiles").empty(); //초기화
-                            // $.each(result.files, function (index, value) {
-                            //     const file = "<div class='getFile' data-value='" + value.file_id + "." + value.file_extension+ "' style='cursor:pointer; display: flex; align-items: center;'>" + 
-                            //                     "<span onclick=\"location.href='/board/fileDown/" + value.file_id + "." + value.file_extension + "/" + value.file_name +"'\">" + 
-                            //                     value.file_name + "." + value.file_extension + 
-                            //                     "</span>" +
-                            //                     "<button class='deleteFile' style='display: none;'>삭제</button>" +
-                            //             "</div>";
-                            //     $("#modalGet #getFiles").append(file);
-                            // });
-
-                            
+                            $("#modalGet #getId").val(id);
+                            $("#modalGet #getLoginId").text(loginId);
+                            $("#modalGet #getName").text(name);
+                            $("#modalGet #getNickname").text(nickname);
+                            $("#modalGet #getMail").text(mail);
+                            $("#modalGet #getTel").text(tel);
+                            $("#modalGet #getAuth").text(auth == 0 ? "관리자" : "일반유저");
+                            $("#modalGet #use input").prop("checked", use == 'y' ? false : true);
 
                         },
                         error: function (error) {
@@ -470,9 +445,80 @@
                             list();
                         }
                     });
+                }
+
+                //계정 잠금 스위치
+                function userSwitch() {
+                    const id = $("#modalGet #getId").val();
+
+                    let param = {};
+
+                    param = {
+                        user_id: id,
+                        value: $("#modalGet #use input").prop("checked") ? 0 : 1
                     }
 
-                
+                    $.ajax({
+                        url: "/user/useChange",
+                        type: "POST",
+                        dataType: "json",
+                        contentType: "application/json",
+                        data: JSON.stringify(param),
+                        success: function (result) {
+                            // alert("통신성공");
+                            console.log(result);
+                            // if(result.resultUser != 1 ) {
+                            //     alert("유저 DB 에러")
+                            // }
+
+
+
+                        },
+                        error: function (error) {
+                            alert("서버에러" + error.status + " " + error.responseText);
+                        }
+                    });
+
+
+                    $("input[type='checkbox']").on("change", function () {
+                        var id = $(this).attr("data-value");
+                        var value = 0;
+
+                        if ($(this).prop("checked")) {
+                            value = 1; //체크
+                        } else {
+                            value = 0; //언체크
+                        }
+
+                        var param = {
+                            user_id: id,
+                            value: value
+                        }
+                        console.log(param);
+
+
+                        $.ajax({
+                            url: "/user/useChange",
+                            type: "POST",
+                            dataType: "json",
+                            contentType: "application/json",
+                            data: JSON.stringify(param),
+                            success: function (result) {
+                                // alert("통신성공");
+                                console.log(result);
+                                if(result.resultUser != 1 ) {
+                                    alert("유저 DB 에러")
+                                }
+
+
+
+                            },
+                            error: function () {
+                                alert("통신에러");
+                            }
+                        });
+                    });
+                }
 
 
             </script>

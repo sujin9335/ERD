@@ -29,11 +29,16 @@ public class UserService {
         return obj;
     }
 
-    public Object get(Map<String, Object> param) {
+    public JSONObject userGet(Map<String, Object> param) {
         JSONObject obj=new JSONObject();
+        System.out.println(param);
 
-        obj=(JSONObject) ud.get(param);
-
+        try {
+            obj=ud.get(param);
+        } catch (Exception e) {
+            System.err.println("get DB에러: " + e.getMessage());
+            throw new RuntimeException("get DB에러", e);
+        }
 
         return obj;
     }
@@ -87,13 +92,15 @@ public class UserService {
         return obj;
     }
 
-    public Object useChange(Map<String, Object> param) {
-        JSONObject obj=new JSONObject();
-        int resultUser=0;
-        resultUser=ud.useChange(param);
-        obj.put("resultUser", resultUser);
+    public void useChange(Map<String, Object> param) {
 
-        return obj;
+        try {
+            ud.useChange(param);
+        } catch (Exception e) {
+            System.err.println("useChange DB에러: " + e.getMessage());
+            throw new RuntimeException("useChange DB에러", e);
+        } 
+
     }
 
     public String pwHashing(String pw) {
