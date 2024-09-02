@@ -72,11 +72,14 @@ public class BoardDao {
 
 		// 리스트
 		String sql = String.format(
-				"select board_id, board_title, tb.user_id, DATE_FORMAT(board_date, '%%Y-%%m-%%d %%H:%%i') AS board_date, board_view, tu.user_nickname, board_date as time " +
+				"select tb.board_id, tb.board_title, tb.user_id, DATE_FORMAT(tb.board_date, '%%Y-%%m-%%d %%H:%%i') AS board_date, tb.board_view, tu.user_nickname, board_date as time, count(tf.file_id) as file_count " +
 				"from tbl_board tb " +
 						"inner join tbl_user tu " +
 						"on tb.user_id = tu.user_id " +
+						"left join tbl_file tf " +
+						"on tb.board_id = tf.board_id " +
 						"WHERE %s LIKE '%%%s%%' " +
+						"GROUP BY tb.board_id, tb.board_title, tb.user_id, tb.board_date, tb.board_view, tu.user_nickname " +
 						"ORDER BY time DESC " +
 						"LIMIT %s OFFSET %s ",
 				searchType, search, listSize, offset);

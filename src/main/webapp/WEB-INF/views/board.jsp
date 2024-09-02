@@ -56,13 +56,15 @@
 
                 <!-- 게시글 리스트 -->
                 <div class="container-fluid py-5 w70">
+                    <div id="searchFilter"></div>
                     <div id="total"></div>
                     <table class="table text-center" id="tab">
                         <thead>
                             <tr>
                                 <th class="col-1" scope="col">번호</th>
-                                <th class="col-4" scope="col">제목</th>
-                                <th class="col-3" scope="col">작성자</th>
+                                <th class="col-3" scope="col">제목</th>
+                                <th class="col-2" scope="col">첨부파일</th>
+                                <th class="col-2" scope="col">작성자</th>
                                 <th class="col-2" scope="col">조회수</th>
                                 <th class="col-2" scope="col">날짜</th>
                             </tr>
@@ -240,7 +242,8 @@
             //현재 페이지
             let pageCurrent = 1;
             //검색 저장
-            let searchSelect = ""; //검색어 (페이지 이동시에 고정된 검색어를 가져와야됨)
+            let searchText = ""; //검색어 (페이지 이동시에 고정된 검색어를 가져와야됨)
+            let searchType = ""; //검색어 (페이지 이동시에 고정된 검색어를 가져와야됨)
 
             //토스트 에디터 (등록, 수정시 내용을 가져올수있음)
             let textEditor = "";
@@ -263,10 +266,21 @@
 
                 let param = {};
 
+                //검색 타입 저장
+                searchType = $("#searchType").val();
+
                 //검색으로 리스트 불렀는지 확인
                 if(search) {
                     pageCurrent = 1; //검색누를경우 1페이지로 이동
-                    searchSelect = $("#search").val(); //검색어 저장
+                    searchText = $("#search").val(); //검색어 저장
+                }
+
+                //검색어표시
+                if(searchText != "") {
+                    let typeText = document.querySelector(`#searchType option[value = "\${ searchType}"]`).innerHTML
+                    document.querySelector("#searchFilter").innerHTML =`검색조건[\${typeText} : \${searchText}]`;
+                }else {
+                    document.querySelector("#searchFilter").innerHTML ="";
                 }
 
                 //몇개씩 볼건지 선택
@@ -275,8 +289,8 @@
                 param = {
                     offset: limitPage * (pageCurrent - 1), //현재 보고있는 페이지
                     listSize: limitPage, // 가져올 데이터의 개수
-                    searchType: $("#searchType").val(),
-                    search: searchSelect
+                    searchType: searchType,
+                    search: searchText
                 };
 
                 $.ajax({
@@ -298,10 +312,13 @@
                             $("#total").text("총:" + result.total + "개")
                             //리스트 출력
                             for (let i = 0; i < result.data.length; i++) {
-                                const index = i + 1 + param.offset;
+                                // const index = i + 1 + param.offset;
+                                const index = ((pageCurrent - 1) *limitPage) +1 + i; //번호메기기
+                                const isFile = result.data[i].file_count > 0 ? '<i class="bi bi-file-arrow-down"></i>' : "-";
                                 const list = "<tr>" +
                                     "<td class='col' data-bs-toggle='modal' data-bs-target='#modalGet' onclick='get(\"" + result.data[i].board_id + "\")'>" + index + "</td>" +
                                     "<td class='col' data-bs-toggle='modal' data-bs-target='#modalGet' onclick='get(\"" + result.data[i].board_id + "\")'>" + escapeHtml(result.data[i].board_title) + "</td>" +
+                                    "<td class='col' data-bs-toggle='modal' data-bs-target='#modalGet' onclick='get(\"" + result.data[i].board_id + "\")'>" + isFile  + "</td>" +
                                     "<td class='col' data-bs-toggle='modal' data-bs-target='#modalGet' onclick='get(\"" + result.data[i].board_id + "\")'>" + result.data[i].user_nickname + "</td>" +
                                     "<td class='col' data-bs-toggle='modal' data-bs-target='#modalGet' onclick='get(\"" + result.data[i].board_id + "\")'>" + result.data[i].board_view + "</td>" +
                                     "<td class='col' data-bs-toggle='modal' data-bs-target='#modalGet' onclick='get(\"" + result.data[i].board_id + "\")'>" + result.data[i].board_date + "</td>" +
@@ -336,7 +353,7 @@
                     alert("마지막 페이지입니다");
                     return;
                 }
-                $("#search").val(searchSelect);
+                $("#search").val(searchText);
                 pageCurrent = number;
                 list();
             }
@@ -344,7 +361,7 @@
             // 5, 10개 씩 보기 변경 // 타입 변경
             function changeLimitType() {
                 $("#search").val("");
-                searchSelect="";
+                searchText="";
                 pageCurrent = 1;
                 list();
             }
@@ -356,7 +373,7 @@
                 $("#limitPage").prop('selectedIndex', 0);
                 $("#search").val("");
                 searchTypeSelect="";
-                searchSelect="";
+                searchText="";
                 list();
             }
 
