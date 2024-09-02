@@ -33,7 +33,8 @@ create table tbl_user (
 	user_auth int(30),
 	user_use varchar(2) default 'n',
 	user_lock_cnt int(5) default 0,
-	user_nickname varchar(30) not null
+	user_nickname varchar(30) not null,
+	user_register_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 drop table tbl_user;

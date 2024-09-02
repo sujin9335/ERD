@@ -2,6 +2,7 @@ package com.codvill.service;
 
 import java.security.MessageDigest;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,13 +24,13 @@ public class UserService {
             
         } catch (Exception e) {
             System.err.println("list DB에러: " + e.getMessage());
-            throw new RuntimeException("list DB에러", e);
+            throw new Exception("list DB에러", e);
         }
 
         return obj;
     }
 
-    public JSONObject userGet(Map<String, Object> param) {
+    public JSONObject userGet(Map<String, Object> param) throws Exception {
         JSONObject obj=new JSONObject();
         System.out.println(param);
 
@@ -37,7 +38,7 @@ public class UserService {
             obj=ud.get(param);
         } catch (Exception e) {
             System.err.println("get DB에러: " + e.getMessage());
-            throw new RuntimeException("get DB에러", e);
+            throw new Exception("get DB에러", e);
         }
 
         return obj;
@@ -52,28 +53,56 @@ public class UserService {
         return obj;
     }
 
-    public Object insert(Map<String, Object> param) {
+    public JSONObject insert(Map<String, Object> param) throws Exception {
         JSONObject obj=new JSONObject();
-        int resultUser=0;
+
+        //유효성 검사
+        //로그인 id 정규식으로 검사
+        if (!Pattern.matches("^[A-Za-z0-9]{1,8}$", param.get("user_login_id").toString())) {
+            throw new Exception("로그인 아이디 유효성 검사 실패");
+        }
+        if (!Pattern.matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{4,16}$", param.get("user_pw").toString())) {
+            throw new Exception("비밀번호 유효성 검사 실패");
+        }
+        if (!Pattern.matches("^^[A-Za-z가-힣]{1,16}$", param.get("user_name").toString())) {
+            throw new Exception("이름 유효성 검사 실패");
+        }
+        if (!Pattern.matches("^01(?:0|1|[6-9])-(?:\\d{4})-\\d{4}$", param.get("user_tel").toString())) {
+            throw new Exception("핸드폰 유효성 검사 실패");
+        }
+        if (!Pattern.matches("^[\\w.%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", param.get("user_mail").toString())) {
+            throw new Exception("메일 유효성 검사 실패");
+        }
+        if (!Pattern.matches("^[가-힣A-Za-z]{1,8}$", param.get("user_nickname").toString())) {
+            throw new Exception("닉네임 유효성 검사 실패");
+        }
+
         //비밀번호 추출
         String pw=(String)param.get("user_pw");
         //비밀번호 해싱후 첨부
         param.put("user_pw", pwHashing(pw));
+        System.out.println(param);
         
-        resultUser=ud.insert(param);
-        obj.put("resultUser", resultUser);
+        try {
+            // ud.insert(param);
+        } catch (Exception e) {
+            System.err.println("insert DB에러: " + e.getMessage());
+            throw new Exception("insert DB에러", e);
+        }
+
+        ud.insert(param);
 
         return obj;
     }
 
-    public JSONObject checkDuplicate(Map<String, Object> param) {
+    public JSONObject checkDuplicate(Map<String, Object> param) throws Exception {
         JSONObject obj=new JSONObject();
 
         try {
             obj=ud.checkDuplicate(param);
         } catch (Exception e) {
             System.err.println("idCheck DB에러: " + e.getMessage());
-            throw new RuntimeException("idCheck DB에러", e);
+            throw new Exception("idCheck DB에러", e);
         }
 
         return obj;

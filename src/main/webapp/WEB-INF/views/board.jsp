@@ -448,7 +448,7 @@
             function modalChange(type) {
 
                 //초기화
-                $("#modalUpsert #id input").val(""); //게시판 id
+                $("#modalUpsert #id").val(""); //게시판 id
                 $("#modalUpsert #title input").val("");
                 $("#modalUpsert #files input").val("");
                 $("#modalUpsert #content").empty();
@@ -478,7 +478,6 @@
                     editorCreate(false, "", "Upsert");
                 } else if(type == "update") {
                     //업데이트
-
                     //기존 파일 삭제 이벤트
                     deletedFileIdArr = []; //초기화
                     $(document).off('click', '.deleteFile').on('click', '.deleteFile', function() {

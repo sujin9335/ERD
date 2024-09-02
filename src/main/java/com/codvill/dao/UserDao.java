@@ -2,6 +2,7 @@ package com.codvill.dao;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -77,7 +78,7 @@ public class UserDao {
 					"user_nickname " +
 				"from tbl_user " +
 						"WHERE %s LIKE '%%%s%%' " +
-						"ORDER BY user_id DESC " +
+						"ORDER BY user_register_date DESC " +
 						"LIMIT %s OFFSET %s ",
 				searchType, search, listSize, offset);
 
@@ -123,33 +124,26 @@ public class UserDao {
 		return value;
 	}
 
-	public int insert(Map<String, Object> param) {
-		JSONObject result = new JSONObject();
-		String id = (String) param.get("user_login_id");
+	public void insert(Map<String, Object> param) {
+		UUID uuid = UUID.randomUUID();
+		String id = uuid.toString();
+		String loginId = param.get("user_login_id").toString();
 		String pw = (String) param.get("user_pw");
-		String name = (String) param.get("user_name");
+		String name = param.get("user_name").toString();
 		String mail = (String) param.get("user_mail");
 		String tel = (String) param.get("user_tel");
+		String nickname = (String) param.get("user_nickname");
 		String auth = "1";
-		if (param.get("user_auth") != null) {
+		if (param.get("user_auth") != null) { //일반회원가입시 권한설정
 			auth = (String) param.get("user_auth");
 		}
 
 		String sql = String
-				.format("insert into tbl_user (user_login_id, user_pw, user_name, user_mail, user_tel, user_auth) " +
-						"values ('%s', '%s', '%s', '%s', '%s', %s)", id, pw, name, mail, tel, auth);
+				.format("insert into tbl_user (user_id, user_login_id, user_pw, user_name, user_mail, user_tel, user_auth, user_nickname) " +
+						"values ('%s', '%s', '%s', '%s', '%s', '%s', %s, '%s')", id, loginId, pw, name, mail, tel, auth, nickname);
 
-		int value = -1;
-		try {
-			value = jt.update(sql);
-		} catch (Exception e) {
-			System.out.println("user insert 에러 발생");
-		}
+		jt.update(sql);
 
-		// List<Map<String, Object>> list=jt.queryForList(sql);
-		// result.put("data", list);
-
-		return value;
 	}
 
 	public JSONObject checkDuplicate(Map<String, Object> param) {

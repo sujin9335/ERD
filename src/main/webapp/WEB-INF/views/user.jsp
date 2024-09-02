@@ -202,7 +202,7 @@
                                     </div>
                                     <div class="col-8 text-start px-4 pt-3" id="loginId">
                                         <input class='w-30' type='text'>
-                                        <button class="btn btn-danger checkBtn" id="idCheck" >중복체크</button>
+                                        <button class="btn btn-danger checkBtn" id="idCheck" onclick="checkDuplicate($(this))">중복체크</button>
                                     </div>
 
                                     <div class="col-1">
@@ -219,8 +219,8 @@
                                         <h3>비밀번호</h3>
                                     </div>
                                     <div class="col-10 text-start px-4 pt-3" id="pw">
-                                        <input type='password' class='w-80 d-block m-1' id='pwCheck1' placeholder='비밀번호'>
-                                        <input type='password' class='w-80 m-1' id='pwCheck2' placeholder='비밀번호 확인'>
+                                        <input type='password' class='w-80 d-block m-1 pwCheck' id='pwCheck1' placeholder='비밀번호'>
+                                        <input type='password' class='w-80 m-1 pwCheck' id='pwCheck2' placeholder='비밀번호 확인'>
                                         <div id="pwCheckText">문자+숫자+특수문자 6자리 이상입니다</div>
                                     </div>
                                 </div>
@@ -238,7 +238,7 @@
                                     </div>
                                     <div class="col-10 text-start p-4 " id="nickname">
                                         <input class='w-70' type='text'>
-                                        <button class="btn btn-danger checkBtn" id="nicknameCheck" >중복체크</button>
+                                        <button class="btn btn-danger checkBtn" id="nicknameCheck" onclick="checkDuplicate($(this))">중복체크</button>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -270,7 +270,7 @@
                                     </div>
                                     <div class="col-1 pt-2 btnDel">
                                         <button type="button" class="btn btn-info edit"
-                                            onclick="insertUser()">등록</button>
+                                            onclick="upsert('insert')">등록</button>
                                     </div>
                                 </div>
                             </div>
@@ -289,10 +289,10 @@
 
                 // 리스트 요청
                 window.onload = function () {
-                    listUser();
+                    list();
                 }
 
-                function listUser(search) {
+                function list(search) {
 
                     //테이블 초기화
                     $("#tab tbody").empty();
@@ -480,6 +480,11 @@
                 //모달 등록, 수정 양식변경
                 function modalChange(type) {
                     //초기화
+                    $("#modalUpsert #loginId button").text("중복체크").removeClass().addClass("btn btn-danger checkBtn").attr("onclick", "checkDuplicate($(this));");
+                    $("#modalUpsert #nickname button").text("중복체크").removeClass().addClass("btn btn-danger checkBtn").attr("onclick", "checkDuplicate($(this));");
+                    $("#modalUpsert #loginId input").prop("disabled", false);
+                    $("#modalUpsert #nickname input").prop("disabled", false);
+                    $("#modalUpsert #id").val("");
                     $("#modalUpsert #loginId input").val("");
                     $("#modalUpsert #pw input").val("");
                     $("#modalUpsert #name input").val("");
@@ -487,6 +492,7 @@
                     $("#modalUpsert #tel input").val("");
                     $("#modalUpsert #mail input").val("");
                     $("#modalUpsert #auth").prop('selectedIndex', 0);
+                    $("#modalUpsert #pwCheckText").text("문자+숫자+특수문자 6자리 이상입니다").css('color', 'black').removeClass();
 
                     if(type == 'update') {
                         $("#modalUpsert #id").val($("#modalGet #getId").val());
@@ -498,19 +504,107 @@
                         $("#modalUpsert #auth").val($("#modalGet #getAuth").text() == '관리자' ? 0 : 1);
                     }
 
-                    $(".checkBtn").click(function() {
-                        checkDuplicate($(this));
+                    $('.pwCheck').on('input', function () {
+                        // console.log($(this).val());
+                        if ($('#pwCheck1').val() != $('#pwCheck2').val()) {
+                            $("#pwCheckText").text("비밀번호 불일치").css('color', 'red');
+                        } else {
+                            $("#pwCheckText").text("비밀번호 일치").css('color', 'green');
+                        }
+
                     });
-
-
-
 
                 }
 
 
                 //등록, 수정
-                function upsert() {
+                function upsert(type) {
+                    let param = {};
+                    let url = "";
+
+                    //각각 값 변수로 저장
+                    const id = $("#modalUpsert #id").val();
+                    const loginId = $("#modalUpsert #loginId input").val();
+                    const pw = $("#modalUpsert #pw input").val();
+                    const name = $("#modalUpsert #name input").val();
+                    const nickname = $("#modalUpsert #nickname input").val();
+                    const tel = $("#modalUpsert #tel input").val();
+                    const mail = $("#modalUpsert #mail input").val();
+                    const auth = $("#modalUpsert #auth").val();
+
+                    if($("#loginId button").text() == "중복체크") {
+                        alert("아이디 중복체크를 해주세요");
+                        return;
+                    }
+
+                    if($("#nickname button").text() == "중복체크") {
+                        alert("닉네임 중복체크를 해주세요");
+                        return;
+                    }
+
+                    if ($('#pwCheck1').val() != $('#pwCheck2').val()) {
+                        alert("비밀번호가 일치하지 않습니다");
+                        return;
+                    }
+
+                    if (!/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{4,16}$/.test(pw)) {
+                        alert("비밀번호 4~16글자, 영문+숫자+특수문자 사용");
+                        return;
+                    }
+
+                    if (!/^[A-Za-z가-힣]{1,16}$/.test(name)) {
+                        alert("이름은 한글, 영어만 사용가능합니다(특수기호, 공백사용불가");
+                        return;
+                    }
+
                     
+                    if (!/^01(?:0|1|[6-9])-(?:\d{4})-\d{4}$/.test(tel)) {
+                        alert("핸드폰 번호에 문제가 있습니다");
+                        return;
+                    }
+
+                    if (!/^[\w.%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(mail)) {
+                        alert("이메일 주소에 문제가 있습니다");
+                        return;
+                    }
+
+                    if(type == "insert") {
+                        url = "/user/insert";
+                    }else if(type == "update") {
+                        url = "/user/update";
+                    }  
+
+                    param = {
+                        user_id: id,
+                        user_login_id: loginId,
+                        user_pw: pw,
+                        user_name: name,
+                        user_nickname: nickname,
+                        user_tel: tel,
+                        user_mail: mail,
+                        user_auth: auth
+                    }
+
+                     
+
+                    $.ajax({
+                        url: url,
+                        type: "POST",
+                        dataType: "json",
+                        contentType: "application/json",
+                        data: JSON.stringify(param),
+                        success: function (result) {
+                            alert("통신성공");
+                            // console.log(result);
+                            $("#modalUpsert").modal('hide');
+                            list();
+
+                        },
+                        error: function (error) {
+                            alert("서버에러" + error.status + " " + error.responseText);
+                        }
+                    });
+
                 }
 
                 //아이디 중복체크
@@ -522,16 +616,19 @@
                     const inputValue = selectDiv.find("input").val(); //input값
 
                     const id = selectDiv.attr("id");//버튼이 속한 div의 id값
+                    // console.log(inputValue);
+                    // console.log(id);
 
-                    console.log(inputValue);
-                    console.log(id);
-
-                    // const loginId = $("#modalUpsert #loginId input").val();
-
-
-                    if(inputValue == "") {
-                        alert("중복체크 내용을 입력해주세요");
-                        return;
+                    if(id == "loginId") {
+                        if(!/^[A-Za-z0-9]{1,8}$/.test(inputValue)) {
+                            alert("아이디는 영문, 숫자 1~8자리로 입력해주세요");
+                            return;
+                        }
+                    } else {
+                        if(!/^[가-힣A-Za-z]{1,8}$/.test(inputValue)) {
+                            alert("닉네임은 한글, 영문 1~8자리로 입력해주세요");
+                            return;
+                        }
                     }
 
                     param = {
@@ -551,7 +648,7 @@
                             console.log(result);
                             if(result.cnt == 0) {
                                 //체크완료 처리
-                                selectDiv.find("button").text("체크해제").removeClass().addClass("btn btn-success").attr("onclick", "clearCheckDuplicate();");
+                                selectDiv.find("button").text("체크해제").removeClass().addClass("btn btn-success").attr("onclick", "clearCheckDuplicate($(this));");
                                 selectDiv.find("input").prop("disabled", true);
                             } else {
                                 alert("중복된 아이디입니다");
@@ -565,9 +662,19 @@
                 }
 
                 //체크해제
-                function clearCheckDuplicate() {
-                    $("#idCheck").text("중복체크").removeClass().addClass("btn btn-danger").attr("onclick", "checkDuplicate('id');");
-                    $("#loginId input").prop("disabled", false);
+                function clearCheckDuplicate(btn) {
+                    // alert("체크해제");
+                    const selectDiv = btn.closest("div"); //버튼이 속한 div
+
+                    const inputValue = selectDiv.find("input").val(); //input값
+
+                    const id = selectDiv.attr("id");//버튼이 속한 div의 id값
+                    // console.log(inputValue);
+                    // console.log(id);
+
+                    selectDiv.find("button").text("중복체크").removeClass().addClass("btn btn-danger checkBtn").attr("onclick", "checkDuplicate($(this));");
+                    selectDiv.find("input").prop("disabled", false);
+
                 }
 
 
