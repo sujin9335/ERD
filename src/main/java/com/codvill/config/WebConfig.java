@@ -13,8 +13,6 @@ public class WebConfig implements WebMvcConfigurer{
     
     @Autowired
     private LoginInterceptor loginInterceptor;
-    @Autowired
-    private MenuInterceptor menuInterceptor;
 
 
 
@@ -28,14 +26,10 @@ public class WebConfig implements WebMvcConfigurer{
                 .excludePathPatterns("/css/**")
                 .excludePathPatterns("/js/**")
                 .excludePathPatterns("/logout")
-                .excludePathPatterns("/user/idCheck")
-                .excludePathPatterns("/user/insert")
+                .excludePathPatterns("/user/idCheck") //일반회원가입 id중복확인
+                .excludePathPatterns("/user/insert") //일반회원가입
                 ;
 
-        registry.addInterceptor(menuInterceptor)
-                .order(1)
-                .addPathPatterns("/user/")
-                .addPathPatterns("/group/")
-                ;
+        
     }
 }

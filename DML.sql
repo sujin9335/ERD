@@ -6,7 +6,7 @@ delete * from tbl_board ;
 
 
 INSERT INTO tbl_board (board_id ,board_title, board_content, user_id)
-VALUES ('019feb9a-1d76-4238-805b-da215ca133c6', '<p>임시제목2</p>', '임시내용2', '263d5a3f-82ab-4ff0-817a-77483353983c');
+VALUES ('019feb9a-1d76-4238-805b-da2250a133c6', '<p>임시제목2</p>', '임시내용2', '263d5a3f-82ab-4ff0-817a-77483353983c');
 
 INSERT INTO tbl_board (board_title, board_content, user_id)
 VALUES ('임시제목', '임시내용', '319b1008-c52a-42be-8d68-ec909f7fee5a');
@@ -39,7 +39,7 @@ INNER JOIN
   tbl_user tu 
 ON 
   tb.user_id = tu.user_id 
-inner join 
+left join 
   tbl_file tf 
 on
   tf.board_id = tb.board_id 
@@ -51,6 +51,17 @@ LIMIT
   5 OFFSET 1;
 
 
+ 
+ 
+ UPDATE tbl_board
+				SET board_view = board_view +1 
+				WHERE board_id = '05ff2c14-2e97-4253-bded-96192e03d788';
+ 
+ select * from tbl_board tb  where board_id = '05ff2c14-2e97-4253-bded-96192e03d788';
+
+select table_name from information_schema.tables where table_name = 'tbl_board';
+select * from tbl_board tb limit 1;
+ 
 
 -- 파일
 select * from tbl_file tf ;

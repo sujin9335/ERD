@@ -55,7 +55,7 @@ public class LoginDao {
     public Map<String, Object> loginCheck(String id, String shaPw) {
         Map<String, Object> map=new HashMap<>();
 
-        String sql=String.format("SELECT " +
+        String sql="SELECT " +
                                     "user_id, " +
                                     "user_login_id, " +
                                     "user_name, " +
@@ -65,11 +65,11 @@ public class LoginDao {
                                     "user_use, " +
                                     "user_lock_cnt " +
                                 "FROM tbl_user " +
-                                    "where user_login_id = '%s' and user_pw = '%s' "
-                                    , id, shaPw);
+                                    "where user_login_id = ? and user_pw = ? ";
+                                    // , id, shaPw);
 
            
-        List<Map<String, Object>> list=jt.queryForList(sql); //리스트를 쓰는이유 map을쓰고 반환이 0개이면 오류가 발생함
+        List<Map<String, Object>> list=jt.queryForList(sql, id, shaPw); //리스트를 쓰는이유 map을쓰고 반환이 0개이면 오류가 발생함
         
         if(list.size() == 1) { // 아이디 비번 동일 계정 있음 .. 가입정보 반환
             map=list.get(0);

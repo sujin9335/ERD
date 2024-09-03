@@ -32,7 +32,8 @@
                     <div class="row">
                         <div class="col px-5">
                             <div class="d-flex" role="search">
-                                <select id="searchType" onchange="changeLimitType()">
+                                <!-- <select id="searchType" onchange="changeLimitType()"> -->
+                                <select id="searchType">
                                     <option value="board_title">제목</option>
                                     <option value="user_nickname">작성자</option>
                                 </select>
@@ -254,7 +255,7 @@
 
             // 리스트 요청
             window.onload = function () {
-                list();
+                list(true);
             }
 
             function list(search) {
@@ -266,13 +267,14 @@
 
                 let param = {};
 
-                //검색 타입 저장
-                searchType = $("#searchType").val();
+                
+                
 
                 //검색으로 리스트 불렀는지 확인
                 if(search) {
                     pageCurrent = 1; //검색누를경우 1페이지로 이동
                     searchText = $("#search").val(); //검색어 저장
+                    searchType = $("#searchType").val();//검색 타입 저장
                 }
 
                 //검색어표시
@@ -358,7 +360,7 @@
                 list();
             }
 
-            // 5, 10개 씩 보기 변경 // 타입 변경
+            // 5, 10개 씩 보기 변경 
             function changeLimitType() {
                 $("#search").val("");
                 searchText="";
@@ -448,7 +450,7 @@
 
 
             //텍스트 에디터 생성(토스트에디터)
-            function editorCreate(isViewer, contentText, seletor) {
+            function editorCreate(isViewer, contentText, seletor) { //읽기전용, 내용, 들어갈곳
                 const selectId = "#modal" + seletor; //들어갈곳 Id
                 $(selectId +' .editorDiv').empty(); //초기화
                 textEditor = new toastui.Editor.factory({
@@ -559,6 +561,7 @@
                 const title = $("#modalUpsert #title input").val().trim();
                 const content = textEditor.getMarkdown();
                 // console.log(content);
+
 
                 //파일 추출
                 const maxSizeBytes = 3 * 1024 * 1024;//파일 최대 사이즈
