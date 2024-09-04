@@ -51,85 +51,56 @@ public class LoginDao {
 		}
 	}
 
-    //아이디와 비밀번호 검색 있으면 list 1반환
+    //유저정보 찾기
     public Map<String, Object> loginCheck(String id, String shaPw) {
-        Map<String, Object> map=new HashMap<>();
+        Map<String, Object> map=null;
 
-        String sql="SELECT " +
-                                    "user_id, " +
-                                    "user_login_id, " +
-                                    "user_name, " +
-                                    "user_mail, " +
-                                    "user_tel, " +
-                                    "user_auth, " +
-                                    "user_use, " +
-                                    "user_lock_cnt " +
-                                "FROM tbl_user " +
-                                    "where user_login_id = ? and user_pw = ? ";
-                                    // , id, shaPw);
-
-           
-        List<Map<String, Object>> list=jt.queryForList(sql, id, shaPw); //리스트를 쓰는이유 map을쓰고 반환이 0개이면 오류가 발생함
+        //1) 아이디로 검색
+        StringBuffer sql=new StringBuffer();
+        sql.append("SELECT " +
+                    "user_id, " +
+                    "user_login_id, " +
+                    "user_pw, " +
+                    "user_name, " +
+                    "user_mail, " +
+                    "user_tel, " +
+                    "user_auth, " +
+                    "user_use, " +
+                    "user_lock_cnt " +
+                "FROM tbl_user " +
+                    "where user_login_id = ? ");
         
-        if(list.size() == 1) { // 아이디 비번 동일 계정 있음 .. 가입정보 반환
-            map=list.get(0);
-        }else { // 아이디 비번 일치 계정 없음
-            //아이디는 있는지 확인
-            String idCheckSql=String.format("SELECT " +
-                                                "user_id, " +
-                                                "user_login_id, " +
-                                                "user_name, " +
-                                                "user_mail, " +
-                                                "user_tel, " +
-                                                "user_auth, " +
-                                                "user_use, " +
-                                                "user_lock_cnt " +
-                                            "FROM tbl_user " +
-                                                "where user_login_id = '%s' "
-                                                , id);
-            List<Map<String, Object>> idList=jt.queryForList(idCheckSql);
-            
-            if (idList.size() == 1) { //아이디가 있을경우 .. id:true 반환
-                map=idList.get(0);
-                map.put("id", true);
-            } else {
-                map=null;
-            }
+        //2) 처리결과 
+        try {
+            map=jt.queryForMap(sql.toString(), id);
+        } catch (Exception e) {
+            System.err.println("일치하는 계정이 없습니다");
+            // e.printStackTrace();
+        }
 
+        //3) 비밀번호 일치여부 확인안되면 {id:true} 반환
+        if(map != null) {
+            if(!map.get("user_pw").equals(shaPw)) {
+                map.put("id", true);
+            }
         }
 
         return map;
+
+
+        
     }
 
-    public void updateLockCnt(String id) {
-        
-        //카운트 몇인지 확인
-        String sql=String.format("select user_lock_cnt from tbl_user where user_login_id = '%s'"
-                                , id);
+    public void updateLockCnt(String id, int cnt) {
 
-        Map<String, Object> map=jt.queryForMap(sql);
+        //카운트 증가
+        String sql = "update tbl_user set user_lock_cnt = (nvl(user_lock_cnt, 0) + 1) where user_login_id = ?";
+        jt.update(sql, id);
 
-        //업데이트될 카운트 값
-        int cnt=(Integer) map.get("user_lock_cnt")+1;
-
-        // System.out.println("카운트");
-        // System.out.println(cnt);
-
-        sql=String.format("update tbl_user " +
-                                "set user_lock_cnt = %d " +
-                                "where user_login_id = '%s' "
-                                , cnt, id);
-           
-        int result = jt.update(sql);
-        //5회일경우 계정 락
         if(cnt == 5) {
-            // System.out.println("5회니?");
-            sql=String.format("update tbl_user "+
-                                "set user_use = 'y' "+
-                                "where user_login_id = '%s' "
-                                , id);
-           
-            result = jt.update(sql);
+            //계정 락
+            sql = "update tbl_user set user_use = 'y' where user_login_id = ?";
+            jt.update(sql, id);
         }
 
 
@@ -137,12 +108,11 @@ public class LoginDao {
 
     public void resetLockCnt(String id) {
 
-        String sql=String.format("update tbl_user " +
-                                "set user_lock_cnt = 0 " +
-                                "where user_login_id = '%s' "
-                                , id);
+        String sql="update tbl_user " +
+                    "set user_lock_cnt = 0 " +
+                    "where user_login_id = ? ";
            
-        int result = jt.update(sql);
+        jt.update(sql, id);
 
     }
     

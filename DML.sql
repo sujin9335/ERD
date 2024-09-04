@@ -2,7 +2,7 @@ use sujin;
 
 -- 게시글 
 select * from tbl_board tb ;
-delete * from tbl_board ;
+delete from tbl_board ;
 
 
 INSERT INTO tbl_board (board_id ,board_title, board_content, user_id)
@@ -39,16 +39,14 @@ INNER JOIN
   tbl_user tu 
 ON 
   tb.user_id = tu.user_id 
-left join 
+left outer join 
   tbl_file tf 
 on
   tf.board_id = tb.board_id 
 WHERE 
   board_title LIKE '%%' 
 ORDER BY 
-  time DESC 
-LIMIT 
-  5 OFFSET 1;
+  time DESC;
 
 
  
@@ -61,11 +59,15 @@ LIMIT
 
 select table_name from information_schema.tables where table_name = 'tbl_board';
 select * from tbl_board tb limit 1;
+
+ALTER TABLE tbl_board 
+MODIFY COLUMN board_title VARCHAR(100) NOT NULL,
+MODIFY COLUMN board_content VARCHAR(4000) NOT NULL;
  
 
 -- 파일
 select * from tbl_file tf ;
-delete * from tbl_file ;
+delete from tbl_file ;
 
 -- 유저
 select * from tbl_user tu ;

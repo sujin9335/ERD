@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.codvill.comm.Utils;
 import com.codvill.service.BoardService;
 
 
@@ -34,18 +35,18 @@ public class BoardController {
     @Autowired
     BoardService bs;
 
-    @Value("${project.uploadpath}") //파일 업로드 경로
-    private String uploadPath;
+    // @Value("${project.uploadpath}") //파일 업로드 경로
+    // private String uploadPath;
  
     @GetMapping("/")
     public String board(){
         return "/board";
     }
 
-    @GetMapping("/form")
-    public String form () {
-        return "/form";
-    }
+    // @GetMapping("/form")
+    // public String form () {
+    //     return "/form";
+    // }
     
     
 
@@ -61,7 +62,8 @@ public class BoardController {
             
             return ResponseEntity.ok(obj);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            System.err.println(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("오류입니다");
         }
         
     }
@@ -77,7 +79,8 @@ public class BoardController {
             obj = bs.boardGet(param);
             return ResponseEntity.ok(obj);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            System.err.println(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("오류입니다");
         }
 
     }
@@ -97,7 +100,8 @@ public class BoardController {
 
             return ResponseEntity.ok("게시글 등록완료");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            System.err.println(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("오류입니다");
         }
 
         
@@ -111,8 +115,8 @@ public class BoardController {
 
         //세션 불러오기
         Map<String, Object> userInfo = (Map<String, Object>) session.getAttribute("userInfo");
-        String userId= userInfo.get("user_id").toString();
-        String userAuth= userInfo.get("user_auth").toString();
+        String userId= Utils.nvl(userInfo.get("user_id").toString(), "");
+        String userAuth= Utils.nvl(userInfo.get("user_auth").toString(), "");
 
         try {
             //param 형식변경
@@ -122,11 +126,11 @@ public class BoardController {
 
             bs.boardUpdate(pramObj, files, userId, userAuth);
 
-            System.out.println(param);
 
             return ResponseEntity.ok("게시글 수정완료");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            System.err.println(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("오류입니다");
         }
         
         
@@ -140,29 +144,32 @@ public class BoardController {
 
         //세션 불러오기
         Map<String, Object> userInfo = (Map<String, Object>) session.getAttribute("userInfo");
-        String userId= userInfo.get("user_id").toString();
-        String userAuth= userInfo.get("user_auth").toString();
+        String userId= Utils.nvl(userInfo.get("user_id").toString(), "");
+        String userAuth= Utils.nvl(userInfo.get("user_auth").toString(), "");
 
         try {
             bs.boardDel(param, userId, userAuth);
 
-            return ResponseEntity.ok(Collections.singletonMap("message", "게시글 삭제완료"));
-            // return ResponseEntity.ok("게시글 삭제완료"); //프론트에서 받는타입을 json으로 정해서 위에처럼 처리해야됨 
+            return ResponseEntity.ok("게시글 삭제완료");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            System.err.println(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("오류입니다");
         }
 
     }
 
     
     //파일 다운로드
-    @GetMapping("/fileDown/{fullName}/{name}")
+    @GetMapping("/fileDown/{id}")
     @ResponseBody
-    public ResponseEntity<byte[]> fileDown(@PathVariable("fullName")String fullName, @PathVariable("name")String name) {
+    public ResponseEntity<byte[]> fileDown(@PathVariable("id")String id) {
         System.out.println("fileDown 작동");
-        System.out.println(fullName + " " + name);
+        System.out.println(id);
+        JSONObject data = new JSONObject();
+        
+        System.out.println(data);
 
-        return bs.fileDown(fullName, name);
+        return bs.fileDown(id);
     }
 
    

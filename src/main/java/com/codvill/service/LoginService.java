@@ -26,8 +26,8 @@ public class LoginService {
         return map;
     }
 
-    public void updateLockCnt(String id) {
-        ld.updateLockCnt(id);
+    public void updateLockCnt(String id, int cnt) {
+        ld.updateLockCnt(id, cnt);
 
 
     }

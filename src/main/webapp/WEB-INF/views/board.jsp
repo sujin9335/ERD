@@ -337,8 +337,8 @@
                         }
                         
                     },
-                    error: function (error) {
-                        alert("서버에러" + error.status + " " + error.responseText);
+                    error: function (request, status, error) {
+                        alert(request.responseText);
                     }
                 });
 
@@ -397,53 +397,56 @@
                     success: function (result) {
                         // alert("통신성공");
                         console.log(result);
-                        const id = result.data.board_id;
-                        const title = result.data.board_title;
-                        const content = result.data.board_content;
-                        const view = result.data.board_view;
-                        const userId = result.data.user_id;
-                        const userNickname = result.data.user_nickname;
 
-                        $("#modalGet #getId").val(id);
-                        $("#modalGet #getTitle").text(title);
-                        $("#modalGet #getView").text(view);
-                        $("#modalGet #getUserId").val(userId);
-                        $("#modalGet #getNickname").text(userNickname);
+                        if (result.data) {
 
-                        // 읽기전용 토스트 에디터
-                        editorCreate(true, content, 'Get'); //읽기전용, 내용
-                        
+                            const id = result.data.board_id;
+                            const title = result.data.board_title;
+                            const content = result.data.board_content;
+                            const view = result.data.board_view+1;
+                            const userId = result.data.user_id;
+                            const userNickname = result.data.user_nickname;
 
-                        const sessionUserId = "<%= id %>";
-                        const sessionAuth = "<%= auth %>";
-                        // console.log(userId + " " +sessionUserId);
-                        //수정 삭제 관리 .. 관리자는 모두 가능
-                        if (userId != sessionUserId && sessionAuth != 0) {
-                            $("#modalGet .checkUser").hide();
+                            $("#modalGet #getId").val(id);
+                            $("#modalGet #getTitle").text(title);
+                            $("#modalGet #getView").text(view);
+                            $("#modalGet #getUserId").val(userId);
+                            $("#modalGet #getNickname").text(userNickname);
+
+                            // 읽기전용 토스트 에디터
+                            editorCreate(true, content, 'Get'); //읽기전용, 내용
+                            
+
+                            const sessionUserId = "<%= id %>";
+                            const sessionAuth = "<%= auth %>";
+                            // console.log(userId + " " +sessionUserId);
+                            //수정 삭제 관리 .. 관리자는 모두 가능
+                            if (userId != sessionUserId && sessionAuth != 0) {
+                                $("#modalGet .checkUser").hide();
+                            } else {
+                                $("#modalGet .checkUser").show();
+                            }
+
+                            //파일 리스트
+                            $("#modalGet #getFiles").empty(); //초기화
+                            $.each(result.files, function (index, value) {
+                                const file = "<div class='getFile' data-value='" + value.file_id + "' style='cursor:pointer; display: flex; align-items: center;'>" + 
+                                                "<span onclick=\"location.href='/board/fileDown/" + value.file_id +"'\">" + 
+                                                value.file_name + "." + value.file_extension + 
+                                                "</span>" +
+                                                "<button class='deleteFile' style='display: none;'>삭제</button>" +
+                                        "</div>";
+                                $("#modalGet #getFiles").append(file);
+                            });
+
+                            list();
                         } else {
-                            $("#modalGet .checkUser").show();
+                            alert("게시글이 존재하지 않습니다");
                         }
-
-                        //파일 리스트
-                        $("#modalGet #getFiles").empty(); //초기화
-                        $.each(result.files, function (index, value) {
-                            const file = "<div class='getFile' data-value='" + value.file_id + "." + value.file_extension+ "' style='cursor:pointer; display: flex; align-items: center;'>" + 
-                                            "<span onclick=\"location.href='/board/fileDown/" + value.file_id + "." + value.file_extension + "/" + value.file_name +"'\">" + 
-                                            value.file_name + "." + value.file_extension + 
-                                            "</span>" +
-                                            "<button class='deleteFile' style='display: none;'>삭제</button>" +
-                                    "</div>";
-                            $("#modalGet #getFiles").append(file);
-                        });
-
-                        list();
-
                     },
-                    error: function (error) {
-                        alert("서버에러" + error.status + " " + error.responseText);
-                        //모달창 닫기
+                    error: function (request, status, error) {
                         $("#modalGet").modal('hide');
-                        list();
+                        alert(request.responseText);
                     }
                 });
             }
@@ -564,11 +567,21 @@
 
 
                 //파일 추출
-                const maxSizeBytes = 3 * 1024 * 1024;//파일 최대 사이즈
+                const maxSize = 100 * 1024 * 1024; // 100MB
+                const totalMaxSize = 500 * 1024 * 1024; // 500MB
+            
+                let totalFileSize = 0;
+                //파일 첨부 사이즈 제한
                 for (let i = 0; i < fileArr.length; i++) {
-                    if (fileArr[i].size > maxSizeBytes) {
-                        alert("파일 사이즈가 3MB를 초과하는 파일이 포함되어 있습니다.");
+                    if (fileArr[i].size > maxSize) {
+                        alert("파일 사이즈가 100MB를 초과하는 파일이 포함되어 있습니다.");
                         return; // upsert 함수 전체를 종료
+                    }else {
+                        totalFileSize += fileArr[i].size;
+                        if (totalFileSize > totalMaxSize) {
+                            alert("총 파일 사이즈가 500MB를 초과합니다.");
+                            return; // upsert 함수 전체를 종료
+                        }
                     }
                     formData.append('files', fileArr[i]);
                 }
@@ -580,24 +593,16 @@
                     return;
                 }
                 
-                if (!/^\S{1,10}$/.test(title)) {
-                    alert("제목은 공백 불가, 10글자 까지입니다");
+                // if (!/^\S{1,100}$/.test(title)) {
+                //     alert("제목은 공백 불가, 10글자 까지입니다");
+                //     return;
+                // }
+
+                if (!/\S{1,4000}/.test(content)) {
+                    alert("내용은 공백 불가, 4천자 까지입니다")
                     return;
                 }
 
-                if (!/\S{1}/.test(content)) {
-                    alert("내용은 공백 불가입니다")
-                    return;
-                }
-
-                //800바이트 이하 검사
-                const encoder = new TextEncoder();
-                const encoded = encoder.encode(content);
-                console.log(encoded.length);
-                if (encoded.length > 800) {
-                    alert("내용은 800바이트 이하입니다");
-                    return;
-                }
                 
                 param = {
                     user_id: sessionUserId,
@@ -634,10 +639,10 @@
                         
                        
                     },
-                    error: function (error) {
-                        alert("서버에러" + error.status + " " + error.responseText);
-                        //모든 모달창 닫기
+                    
+                    error: function (request, status, error) {
                         $("#modalUpsert").modal('hide');
+                        alert(request.responseText);
                         list();
                     }
                 });
@@ -672,7 +677,6 @@
                 $.ajax({
                     url: "/board/del",
                     type: "POST",
-                    dataType: "json",
                     contentType: "application/json",
                     data: JSON.stringify(param),
                     success: function (result) {

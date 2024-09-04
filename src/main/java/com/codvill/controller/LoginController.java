@@ -14,7 +14,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.codvill.comm.Utils;
 import com.codvill.service.LoginService;
+
+import ch.qos.logback.classic.pattern.Util;
 
 
 @Controller
@@ -35,7 +38,10 @@ public class LoginController {
 
         // System.out.println(id+ " " + pw);
 
-        Map<String, Object> map=ls.loginCheck(id,pw);
+        String loginId=Utils.nvl(id, "");
+        String loginPw=Utils.nvl(pw, "");
+
+        Map<String, Object> map=ls.loginCheck(loginId, loginPw);
         System.out.println(map);
 
         if(map == null) { //로그인 실패
@@ -49,15 +55,16 @@ public class LoginController {
 
                 if(map.get("id") != null) { //로그인시 비번만 틀렸을경우
                     //로그인 실패 카운트 증가 
-                    model.addAttribute("msg", "비밀번호를 " + (Integer.parseInt(map.get("user_lock_cnt").toString()) +1) + "회 잘못 입력하셨습니다");
-                    ls.updateLockCnt(id);
+                    int cnt=(Integer) map.get("user_lock_cnt")+1; //로그인 실패 횟수
+                    model.addAttribute("msg", "비밀번호를 " + cnt + "회 잘못 입력하셨습니다");
+                    ls.updateLockCnt(loginId, cnt);
                 }else {
                     String user_use=(String) map.get("user_use");
                     if (user_use.equals("n")) {
                         model.addAttribute("msg", "계정 잠금 상태입니다 관리자 문의하세요");
                     }else {
 
-                        ls.resetLockCnt(id);
+                        ls.resetLockCnt(loginId);
 
                         System.out.println("로그인성공");
                         Map<String, Object> userInfo=new HashMap<>();
