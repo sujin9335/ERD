@@ -141,11 +141,10 @@ public class BoardService {
                 Path filePath = Paths.get(uploadPath, uuid.toString());
                 Files.write(filePath, file.getBytes());
 
-                // fileNamesList.add(uuid.toString()); //저장실패시 삭제용
+                fileIdsList.add(uuid.toString()); //저장실패시 삭제용
 
                 // DB저장
                 bD.fileInsert(realFileName, uuid.toString(), fileExtension, uploadPath, boardId);
-                fileIdsList.add(uuid.toString()); //저장실패시 삭제용
 
             }
         } catch (Exception e) {
@@ -214,8 +213,7 @@ public class BoardService {
         }
 
 
-        List<Map<String, Object>> filesDB = bD.fileListGet(param); //DB에 저장된 파일들
-        List<String> fileIdsDB = new ArrayList<String>(); // 삭제된 파일ID저장
+        
         //기존 첨부되있던 파일처리(삭제)========================
         JSONArray fileIds=(JSONArray) param.get("file_id");
         if (fileIds == null) { //null 처리
@@ -223,14 +221,21 @@ public class BoardService {
         }
         
         if (fileIds.size() > 0) { //삭제 파일 있을시
+
+            List<Map<String, Object>> filesDB = bD.fileListGet(param); //DB에 저장된 파일들
+            // List<String> fileIdsDB = new ArrayList<String>(); // 삭제된 파일ID저장
+            String fileIdDb="";
+
             try {
                 for (int i = 0; i < fileIds.size(); i++) {
-                    //파일 명, 확장자 분리
+                    //파일 명
                     String fileId = (String) fileIds.get(i);
                     //파일 DB에서 삭제
                     bD.delFile(fileId); //DB에서 파일삭제
-                    fileIdsDB.add(fileId); //삭제된 파일ID저장
+                    // fileIdsDB.add(fileId); //삭제된 파일ID저장
+                    fileIdDb = fileId;
                     fileDel(fileId); //저장소에서 파일삭제
+                    fileIdDb="";//초기화
                 }
             
             } catch (Exception e) {
@@ -241,18 +246,18 @@ public class BoardService {
                 // filesDel(list.get(0), list.get(1));
                 filesDel(list);
                 //DB에 저장된 파일 롤백
-                if(fileIdsDB.size() > 0) { //(String fileName, String fileId, String fileExtension, String uploadPath, String board_id)
-                    for (String fileId : fileIdsDB) {
-                        for (Map<String, Object> file : filesDB) { //DB에 저장된 파일들비교
-                            fileId.equals(Utils.nvl(file.get("file_id").toString(), ""));
-                            bD.fileInsert(Utils.nvl(file.get("file_name").toString(),""), 
-                                            Utils.nvl(file.get("file_id").toString(),""), 
-                                            Utils.nvl(file.get("file_extension").toString(),""), 
-                                            Utils.nvl(file.get("upload_path").toString(),""), 
-                                            Utils.nvl(file.get("board_id").toString(),""));
-                        }
+                if(!fileIdDb.equals("")) { //DB삭제된 파일이 있을경우
+                    for (Map<String, Object> file : filesDB) { //DB에 저장된 파일들비교 해서 DB롤백
+                        fileIdDb.equals(Utils.nvl(file.get("file_id").toString(), ""));
+                        bD.fileInsert(Utils.nvl(file.get("file_name").toString(),""), 
+                                        Utils.nvl(file.get("file_id").toString(),""), 
+                                        Utils.nvl(file.get("file_extension").toString(),""), 
+                                        Utils.nvl(file.get("upload_path").toString(),""), 
+                                        Utils.nvl(file.get("board_id").toString(),""));
                     }
                 }
+
+                //신규로 저장된거 삭제 , 기존파일 롤백
 
                 throw new RuntimeException("기존파일 삭제 에러");
             }
@@ -278,21 +283,43 @@ public class BoardService {
         //세션 관리자, 유저 확인
         String userId=Utils.nvl(boardMap.get("user_id").toString(),""); //게시글의 유저ID
         sessionCheck(userId, sessionUserId, sessionAuth);
+        
+        //게시글 삭제
+        bD.boardDel(Utils.nvl(param.get("board_id").toString(), ""));
 
         //파일 삭제
-        List<String> files=(List<String>) param.get("files");
-        if (files == null) {
-            files = new ArrayList<>();
+        List<String> filesIds=(List<String>) param.get("files");
+        if (filesIds == null) {
+            filesIds = new ArrayList<>();
         }
-        if(files.size() > 0) {
-            for (String file : files) {
-                bD.delFile(file); //DB에서 파일삭제
-                fileDel(file);
+        if(filesIds.size() > 0) {// 삭제할 파일 있을경우
+            List<Map<String, Object>> filesDB = bD.fileListGet(param); //DB에 저장된 파일들
+            String fileIdDb="";
+
+            
+            try {
+                for (String fileId : filesIds) {
+                    bD.delFile(fileId); //DB에서 파일삭제
+                    fileIdDb = fileId;
+                    fileDel(fileId); //저장소 삭제
+                }
+                
+            } catch (Exception e) {
+                bD.boardUpdate(boardMap);//게시글 롤백
+                //DB에 저장된 파일 롤백
+                if(!fileIdDb.equals("")) { //DB삭제된 파일이 있을경우
+                    for (Map<String, Object> file : filesDB) { //DB에 저장된 파일들비교 해서 DB롤백
+                        fileIdDb.equals(Utils.nvl(file.get("file_id").toString(), ""));
+                        bD.fileInsert(Utils.nvl(file.get("file_name").toString(),""), 
+                                        Utils.nvl(file.get("file_id").toString(),""), 
+                                        Utils.nvl(file.get("file_extension").toString(),""), 
+                                        Utils.nvl(file.get("upload_path").toString(),""), 
+                                        Utils.nvl(file.get("board_id").toString(),""));
+                    }
+                }
             }
         }
 
-        //게시글 삭제
-        bD.boardDel(Utils.nvl(param.get("board_id").toString(), ""));
         
 
 
