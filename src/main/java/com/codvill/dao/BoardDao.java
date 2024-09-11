@@ -65,10 +65,15 @@ public class BoardDao {
 	public JSONObject boardList(Map<String, Object> param) { //{offset=0, listSize=5, searchType=board_title, search=}
 		JSONObject result = new JSONObject();
 
-		String offset = Utils.nvl(param.get("offset").toString(), "0");
-		String listSize = Utils.nvl(param.get("listSize").toString(), "5");
-		String searchType = Utils.nvl(param.get("searchType").toString(), "board_title");
-		String search = Utils.nvl(param.get("search").toString(), "");
+		int offset = 0;
+		
+
+		if(param.get("offset") != null) {
+			offset = (Integer)param.get("offset");
+		}
+		String listSize = Utils.nvl((String)param.get("listSize"), "5");
+		String searchType = Utils.nvl((String)param.get("searchType"), "board_title");
+		String search = Utils.nvl((String)param.get("search"), "");
 
 		// 총 갯수
 		String totalSql =
@@ -96,7 +101,7 @@ public class BoardDao {
 				"ORDER BY time DESC " +
 				"LIMIT ? OFFSET ?";
 			
-			list = jt.queryForList(listSql, "%" + search + "%", Integer.parseInt(listSize), Integer.parseInt(offset));
+			list = jt.queryForList(listSql, "%" + search + "%", Integer.parseInt(listSize), offset);
 
 		}
 
@@ -110,7 +115,7 @@ public class BoardDao {
 
 	public Map<String, Object> boardGet(Map<String, Object> param) {
 		Map<String, Object> result = new HashMap<>();
-		String id = Utils.nvl(param.get("board_id").toString(), "");
+		String id = Utils.nvl((String)param.get("board_id"), "");
 
 		// get
 		String sql = 
@@ -130,7 +135,7 @@ public class BoardDao {
 
 	public void boardViewCountAdd(Map<String, Object> param) {
 
-		String id =  Utils.nvl(param.get("board_id").toString(), "");
+		String id =  Utils.nvl((String)param.get("board_id"), "");
 		String sql = "UPDATE tbl_board " +
 				"SET board_view = board_view + 1 " +
 				"WHERE board_id = ?";
@@ -141,7 +146,7 @@ public class BoardDao {
     public List<Map<String, Object>> fileListGet(Map<String, Object> param) {
 		List<Map<String, Object>> files = new ArrayList<>();
 
-		String id = Utils.nvl(param.get("board_id").toString(), "");
+		String id = Utils.nvl((String)param.get("board_id"), "");
 		String sql ="select * " +
 				"from tbl_file where board_id=?";
 		files = jt.queryForList(sql, id);
@@ -151,9 +156,9 @@ public class BoardDao {
 
 	public void boardInsert(Map<String, Object> param, String id) { //{"board_title":"2","board_content":"2","user_id":"1"}
 
-		String title = Utils.nvl(param.get("board_title").toString(),"");
-		String content = Utils.nvl(param.get("board_content").toString(),"");
-		String userId = Utils.nvl(param.get("user_id").toString(),"");
+		String title = Utils.nvl((String)param.get("board_title"),"");
+		String content = Utils.nvl((String)param.get("board_content"),"");
+		String userId = Utils.nvl((String)param.get("user_id"),"");
 
 		String sql ="INSERT INTO tbl_board (board_id, board_title, board_content, user_id) " +
 				"VALUES (?, ?, ?, ?)";
@@ -163,9 +168,9 @@ public class BoardDao {
 
 	public void boardUpdate(Map<String, Object> param) { //{"user_id":"1","board_title":"2","file_id":["7","8","9"],"board_id":"10","board_content":"2"}
 
-		String title =  Utils.nvl(param.get("board_title").toString(),"");
-		String content = Utils.nvl(param.get("board_content").toString(),"");
-		String id =  Utils.nvl(param.get("board_id").toString(),"");
+		String title =  Utils.nvl((String)param.get("board_title"),"");
+		String content = Utils.nvl((String)param.get("board_content"),"");
+		String id =  Utils.nvl((String)param.get("board_id"),"");
 
 		String sql = "UPDATE tbl_board " +
 				"SET board_title = ?, board_content = ? " +

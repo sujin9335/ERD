@@ -11,4 +11,12 @@ public class Utils {
 		}
 	}
     
+	public static int nvl(int str, int def){
+		if(str == null){
+			return def;
+		}
+		else{
+			return str;
+		}
+	}
 }

@@ -87,9 +87,9 @@ public class BoardService {
 
     }
 
-    public void boardCheck(Map<String, Object> param, MultipartFile[] files) {
-        String title = Utils.nvl(param.get("board_title").toString(), "");
-        String content = Utils.nvl(param.get("board_content").toString(), "");
+    public void boardCheck(Map<String, Object> param, MultipartFile[] files)  {
+        String title = Utils.nvl((String)param.get("board_title"), "");
+        String content = Utils.nvl((String)param.get("board_content"), "");
 
         if (title.length() < 1 || title.length() > 100) {
             throw new RuntimeException("제목은 1자 이상 100자 이하여야 합니다.");
@@ -203,7 +203,7 @@ public class BoardService {
         //새로 첨부된 파일 넣기========================
         if(files.length > 0) {
             // insert 된 게시글 id값 가져오기 (파일DB저장 처리용)
-            String board_id = Utils.nvl(param.get("board_id").toString(), "");
+            String board_id = Utils.nvl((String)param.get("board_id"), "");
             try {
                 list=fileSave(files, board_id); //저장된 파이명, 파일id 반환
             } catch (Exception e) {
@@ -248,12 +248,12 @@ public class BoardService {
                 //DB에 저장된 파일 롤백
                 if(!fileIdDb.equals("")) { //DB삭제된 파일이 있을경우
                     for (Map<String, Object> file : filesDB) { //DB에 저장된 파일들비교 해서 DB롤백
-                        fileIdDb.equals(Utils.nvl(file.get("file_id").toString(), ""));
-                        bD.fileInsert(Utils.nvl(file.get("file_name").toString(),""), 
-                                        Utils.nvl(file.get("file_id").toString(),""), 
-                                        Utils.nvl(file.get("file_extension").toString(),""), 
-                                        Utils.nvl(file.get("upload_path").toString(),""), 
-                                        Utils.nvl(file.get("board_id").toString(),""));
+                        fileIdDb.equals(Utils.nvl((String)file.get("file_id"), ""));
+                        bD.fileInsert(Utils.nvl((String)file.get("file_name"),""), 
+                                        Utils.nvl((String)file.get("file_id"),""), 
+                                        Utils.nvl((String)file.get("file_extension"),""), 
+                                        Utils.nvl((String)file.get("upload_path"),""), 
+                                        Utils.nvl((String)file.get("board_id"),""));
                     }
                 }
 
@@ -281,11 +281,11 @@ public class BoardService {
         Map<String, Object> boardMap = bD.boardGet(param);
 
         //세션 관리자, 유저 확인
-        String userId=Utils.nvl(boardMap.get("user_id").toString(),""); //게시글의 유저ID
+        String userId=Utils.nvl((String)boardMap.get("user_id"),""); //게시글의 유저ID
         sessionCheck(userId, sessionUserId, sessionAuth);
         
         //게시글 삭제
-        bD.boardDel(Utils.nvl(param.get("board_id").toString(), ""));
+        bD.boardDel(Utils.nvl((String)param.get("board_id"), ""));
 
         //파일 삭제
         List<String> filesIds=(List<String>) param.get("files");
@@ -309,12 +309,12 @@ public class BoardService {
                 //DB에 저장된 파일 롤백
                 if(!fileIdDb.equals("")) { //DB삭제된 파일이 있을경우
                     for (Map<String, Object> file : filesDB) { //DB에 저장된 파일들비교 해서 DB롤백
-                        fileIdDb.equals(Utils.nvl(file.get("file_id").toString(), ""));
-                        bD.fileInsert(Utils.nvl(file.get("file_name").toString(),""), 
-                                        Utils.nvl(file.get("file_id").toString(),""), 
-                                        Utils.nvl(file.get("file_extension").toString(),""), 
-                                        Utils.nvl(file.get("upload_path").toString(),""), 
-                                        Utils.nvl(file.get("board_id").toString(),""));
+                        fileIdDb.equals(Utils.nvl((String)file.get("file_id"), ""));
+                        bD.fileInsert(Utils.nvl((String)file.get("file_name"),""), 
+                                        Utils.nvl((String)file.get("file_id"),""), 
+                                        Utils.nvl((String)file.get("file_extension"),""), 
+                                        Utils.nvl((String)file.get("upload_path"),""), 
+                                        Utils.nvl((String)file.get("board_id"),""));
                     }
                 }
             }
